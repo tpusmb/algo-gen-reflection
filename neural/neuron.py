@@ -5,8 +5,7 @@ from __future__ import absolute_import
 import os
 import random
 import logging.handlers
-
-from neural.input import Input
+from neural import Input
 
 PYTHON_LOGGER = logging.getLogger(__name__)
 if not os.path.exists("log"):
@@ -29,12 +28,13 @@ class Neuron:
 
     def __init__(self, input_liste, activation_function):
 
-        for given_input in input_list:
+        for given_input in input_liste:
             if type(given_input) != Input:
                 raise TypeError("Given input is not Type Input")
 
         # We append the bias node with allway +1 value
-        self.input_liste = input_liste.append(Input())
+        input_liste.append(Input(1.0))
+        self.input_liste = input_liste
         # Generate the input weight
         self.weight_liste = [random.random() for _ in range(len(self.input_liste))]
         self.activation_function = activation_function
@@ -58,7 +58,7 @@ class Neuron:
 
 if __name__ == "__main__":
 
-    input_list = [1, 2, 3, 4]
+    input_list = [Input(0.5), Input(1)]
     neuron = Neuron(input_list, 10)
     pass
 

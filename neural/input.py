@@ -30,6 +30,8 @@ class Input:
 
         :param value: Value between 0 and 1
         """
+        if value > 1 or value < 0:
+            raise ValueError("The given value not between 0 and 1")
         self.value = value
 
     def get_value(self):
