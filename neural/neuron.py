@@ -26,39 +26,37 @@ FOLDER_ABSOLUTE_PATH = os.path.normpath(os.path.dirname(os.path.abspath(__file__
 
 class Neuron:
 
-    def __init__(self, input_liste, activation_function):
+    def __init__(self, input_liste, max_value, activation_function):
 
         for given_input in input_liste:
             if type(given_input) != Input:
                 raise TypeError("Given input is not Type Input")
 
         # We append the bias node with allway +1 value
-        input_liste.append(Input(1.0))
         self.input_liste = input_liste
-        # Generate the input weight
-        self.weight_liste = [random.random() for _ in range(len(self.input_liste))]
+        # Generate the input weight + 1 we ad the bias node
+        self.weight_liste = [random.uniform(-max_value, max_value) for _ in range(len(self.input_liste) + 1)]
+        # Add the bias node
         self.activation_function = activation_function
-        self.output = None
+        self.threshold = len(self.input_liste) * self.weight_liste[-1]
 
     def compute(self):
         """
 
         :return:
         """
-        res = 0.0
+        res = -self.threshold
         for given_input, weight in zip(input_list, self.weight_liste):
             res += given_input.get_value() * weight
 
-        self.output = res
-
-    def get_output(self):
-
-        return self.output
+        return self.activation_function(res)
 
 
 if __name__ == "__main__":
-
-    input_list = [Input(0.5), Input(1)]
-    neuron = Neuron(input_list, 10)
-    pass
-
+    from neural import classic_thread_shot
+    a = Input(0)
+    b = Input(0)
+    input_list = [a, b]
+    neuron = Neuron(input_list, 1.0, classic_thread_shot)
+    neuron.compute()
+    print("dd")
