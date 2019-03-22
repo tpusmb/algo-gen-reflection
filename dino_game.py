@@ -363,8 +363,6 @@ class Game:
         self.HI_rect.top = height * 0.1
         self.HI_rect.left = width * 0.73
 
-        self.game_loop()
-
     def game_loop(self):
         global HIGH_SCORE
         while not self.game_quit:
@@ -538,6 +536,7 @@ def main():
     is_game_quit = intro_screen()
     if not is_game_quit:
         game = Game()
+        game.game_loop()
 
 
 main()
