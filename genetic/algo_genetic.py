@@ -10,29 +10,29 @@ class algo_genetic:
         self.genome_size = genome_size
         self.mutate_ratio = mutate_ratio
 
-    def init_population(self) -> population:
+    def init_population(self) -> 'population':
         pass
 
-    def init_genome(self) -> genome:
+    def init_genome(self) -> 'genome':
         pass
 
     """
     return a subset of the mates_pool, ready to reproduce
     """
-    def select_mates(self, potential_mates_pool: population) -> population:
+    def select_mates(self, potential_mates_pool) -> 'population':
         pass
 
-    def reproduction(self, mates: population) -> population:
+    def reproduction(self, mates) -> 'population':
         pass
 
     """
     mutate a population by changing his genome
     this method keep the population size
     """
-    def mutation(self, population: population) -> population:
+    def mutation(self, population) -> 'population':
         pass
 
-    def step(self, previous_population: population) -> population:
+    def step(self, previous_population) -> 'population':
         mates = self.select_mates(previous_population)
         children = self.reproduction(mates)
         return self.mutation(children)
