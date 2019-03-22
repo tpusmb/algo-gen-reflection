@@ -1,10 +1,9 @@
-
 __author__ = "Rohit Rane"
 
-import os
-import sys
-import pygame
 import random
+import os
+
+import pygame
 from pygame import *
 
 pygame.init()
@@ -52,12 +51,12 @@ def load_sprite_sheet(sheet_name, nx, ny, scale_x=-1, scale_y=-1, color_key=None
 
     sprites = []
 
-    size_x = sheet_rect.width/nx
-    size_y = sheet_rect.height/ny
+    size_x = sheet_rect.width / nx
+    size_y = sheet_rect.height / ny
 
     for i in range(0, ny):
         for j in range(0, nx):
-            rect = pygame.Rect((j*size_x, i*size_y, size_x, size_y))
+            rect = pygame.Rect((j * size_x, i * size_y, size_x, size_y))
             current_image = pygame.Surface(rect.size)
             current_image = current_image.convert()
             current_image.blit(sheet, (0, 0), rect)
@@ -80,7 +79,7 @@ def load_sprite_sheet(sheet_name, nx, ny, scale_x=-1, scale_y=-1, color_key=None
 def display_game_over_msg(retry_button_image, game_over_image):
     retry_button_rect = retry_button_image.get_rect()
     retry_button_rect.centerx = width / 2
-    retry_button_rect.top = height*0.52
+    retry_button_rect.top = height * 0.52
 
     game_over_rect = game_over_image.get_rect()
     game_over_rect.centerx = width / 2
@@ -196,7 +195,7 @@ class Cactus(pygame.sprite.Sprite):
 
 class Ptera(pygame.sprite.Sprite):
     def __init__(self, speed=5, size_x=-1, size_y=-1):
-        pygame.sprite.Sprite.__init__(self,self.containers)
+        pygame.sprite.Sprite.__init__(self, self.containers)
         self.images, self.rect = load_sprite_sheet('ptera.png', 2, 1, size_x, size_y, -1)
         self.ptera_height = [height * 0.82, height * 0.75, height * 0.60]
         self.rect.centery = self.ptera_height[random.randrange(0, 3)]
@@ -268,11 +267,11 @@ class Scoreboard:
         self.image = pygame.Surface((55, int(11 * 6 / 5)))
         self.rect = self.image.get_rect()
         if x == -1:
-            self.rect.left = width*0.89
+            self.rect.left = width * 0.89
         else:
             self.rect.left = x
         if y == -1:
-            self.rect.top = height*0.1
+            self.rect.top = height * 0.1
         else:
             self.rect.top = y
 
@@ -448,10 +447,10 @@ class Game:
                     DIE_SOUND.play()
 
         if len(self.pteras) == 0 and random.randrange(0, 200) == 10 and self.counter > 500:
-                            for l in self.last_obstacle:
-                                if l.rect.right < width*0.8:
-                                    self.last_obstacle.empty()
-                                    self.last_obstacle.add(Ptera(self.game_speed, 46, 40))
+            for l in self.last_obstacle:
+                if l.rect.right < width * 0.8:
+                    self.last_obstacle.empty()
+                    self.last_obstacle.add(Ptera(self.game_speed, 46, 40))
 
     def clouds_loop(self):
         if len(self.clouds) < 5 and random.randrange(0, 300) == 10:
@@ -532,11 +531,8 @@ class Game:
             CLOCK.tick(FPS)
 
 
-def main():
+def start_game():
     is_game_quit = intro_screen()
     if not is_game_quit:
         game = Game()
         game.game_loop()
-
-
-main()
