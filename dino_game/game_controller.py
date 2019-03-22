@@ -36,11 +36,20 @@ class GameController:
     def jump(self):
         self.game.jump()
 
+    def duck(self):
+        self.game.duck()
+
+    def stop_duck(self):
+        self.game.stop_duck()
+
     def restart_game(self):
         self.game.restart_game()
 
     def get_speed(self):
         return self.game.get_speed()
+
+    def is_ducking(self):
+        return self.game.is_ducking()
 
     def get_distance_of_first_obstacle(self):
         return self.game.get_distance_of_first_obstacle()
@@ -58,6 +67,10 @@ if __name__ == "__main__":
         if controller.game_is_over():
             controller.restart_game()
         else:
+            if controller.is_ducking():
+                controller.stop_duck()
+            else:
+                controller.duck()
             controller.jump()
             time.sleep(0.1)
 
