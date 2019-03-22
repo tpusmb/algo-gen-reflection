@@ -377,7 +377,7 @@ class Game:
                     self.key_event_loop()
 
                 self.cactis_loop()
-                self.pteras_loop()
+                # self.pteras_loop()
                 self.clouds_loop()
                 self.update_everything()
                 self.ground_loop()
