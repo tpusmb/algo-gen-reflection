@@ -1,3 +1,5 @@
+import operator
+import random
 from genetic.algo_genetic import *
 
 
@@ -29,3 +31,35 @@ class algo_genetic_by_functions(algo_genetic):
     """
     def mutation(self, population) -> 'population':
         return self.mutation_fun(population)
+
+
+def generic_selection(potential_mates_pool: population) -> population:
+    """
+    Generic selection as defined by : https://en.wikipedia.org/wiki/Selection_(genetic_algorithm)
+    :param potential_mates_pool:
+    :return:
+    """
+    total_score = 0
+    for ind in potential_mates_pool:
+        total_score += ind.getScore()
+
+    my_pool = {}
+    for ind in potential_mates_pool:
+        my_pool[ind] = ind.getScore() / total_score
+
+    # sort pool by fitness
+    my_pool = sorted(my_pool.items(), key=operator.itemgetter(1), reverse=True)
+
+    # build a histogram
+    pool_sum = 0
+    for ind in my_pool:
+        my_pool[ind] += pool_sum
+        pool_sum = my_pool[ind]
+    assert pool_sum == 1
+
+    R = random.random()
+    for ind in my_pool:
+        if my_pool[ind] > R:
+            return [ind]  # TODO return more than 1
+    print("ERROR, no value found")
+

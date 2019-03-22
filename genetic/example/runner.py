@@ -1,6 +1,7 @@
 
 
 from genetic import *
+from genetic.algo_genetic_by_functions import algo_genetic_by_functions
 
 populationSize = 10
 genomeSize = 5
@@ -17,7 +18,7 @@ class myIndividual(individual):
 
 def main():
 
-    myGeneticAglo = algo_genetic(populationSize, genomeSize, mutateRatio)
+    myGeneticAglo = algo_genetic_by_functions(populationSize, genomeSize, mutateRatio)
 
     myPopulation = myGeneticAglo.init_population()
     # cast population in myINdividual (scpecify getScore fct)
