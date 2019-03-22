@@ -8,6 +8,7 @@ from pygame import *
 
 pygame.init()
 
+FOLDER_ABSOLUTE_PATH = os.path.normpath(os.path.dirname(os.path.abspath(__file__)))
 SCREEN_SIZE = (width, height) = (600, 150)
 FPS = 60
 GRAVITY = 0.6
@@ -22,9 +23,9 @@ APP_SCREEN = pygame.display.set_mode(SCREEN_SIZE)
 CLOCK = pygame.time.Clock()
 pygame.display.set_caption("Dino Run")
 
-JUMP_SOUND = pygame.mixer.Sound('sprites/jump.wav')
-DIE_SOUND = pygame.mixer.Sound('sprites/die.wav')
-CHECKPOINT_SOUND = pygame.mixer.Sound('sprites/checkPoint.wav')
+JUMP_SOUND = pygame.mixer.Sound(os.path.join(FOLDER_ABSOLUTE_PATH, 'sprites', 'jump.wav'))
+DIE_SOUND = pygame.mixer.Sound(os.path.join(FOLDER_ABSOLUTE_PATH, 'sprites', 'die.wav'))
+CHECKPOINT_SOUND = pygame.mixer.Sound(os.path.join(FOLDER_ABSOLUTE_PATH, 'sprites', 'checkPoint.wav'))
 
 
 def load_image(name, size_x=-1, size_y=-1, color_key=None):
@@ -380,8 +381,7 @@ class Game:
 
                         if game_event.type == pygame.KEYDOWN:
                             if game_event.key == pygame.K_SPACE:
-                                if self.player_dino.rect.bottom == int(0.98 * height):
-                                    self.jump()
+                                self.jump()
 
                             if game_event.key == pygame.K_DOWN:
                                 if not (self.player_dino.isJumping and self.player_dino.isDead):
@@ -470,11 +470,32 @@ class Game:
             self.player_dino.draw()
             pygame.display.update()
 
-    def jump(self):
-        self.player_dino.isJumping = True
-        if pygame.mixer.get_init() is not None:
-            JUMP_SOUND.play()
-            self.player_dino.movement[1] = -1 * self.player_dino.jumpSpeed
+    def game_over_loop(self):
+        while self.game_over:
+            if pygame.display.get_surface() is None:
+                print("Couldn't load display surface")
+                self.game_quit = True
+                self.game_over = False
+            else:
+                for game_event in pygame.event.get():
+                    if game_event.type == pygame.QUIT:
+                        self.game_quit = True
+                        self.game_over = False
+                    if game_event.type == pygame.KEYDOWN:
+                        if game_event.key == pygame.K_ESCAPE:
+                            self.game_quit = True
+                            self.game_over = False
+
+                        if game_event.key == pygame.K_RETURN or game_event.key == pygame.K_SPACE:
+                            self.restart_game()
+            self.high_score.update(HIGH_SCORE)
+            if pygame.display.get_surface() is not None:
+                display_game_over_msg(self.retry_button_image, self.game_over_image)
+                if HIGH_SCORE != 0:
+                    self.high_score.draw()
+                    APP_SCREEN.blit(self.HI_image, self.HI_rect)
+                pygame.display.update()
+            CLOCK.tick(FPS)
 
     def update_everything(self):
         self.player_dino.update()
@@ -484,6 +505,20 @@ class Game:
         self.new_ground.update()
         self.scb.update(self.player_dino.score)
         self.high_score.update(HIGH_SCORE)
+
+    def jump(self):
+        if self.player_dino.rect.bottom == int(0.98 * height):
+            self.player_dino.isJumping = True
+            if pygame.mixer.get_init() is not None:
+                JUMP_SOUND.play()
+                self.player_dino.movement[1] = -1 * self.player_dino.jumpSpeed
+
+    def restart_game(self):
+        self.game_over = False
+        self.__init__()
+
+    def get_speed(self):
+        return self.game_speed
 
     def get_distance_of_first_obstacle(self):
         if len(self.cacti) != 0 and self.cacti.sprites()[0].rect.left - self.player_dino.rect.right >= 0:
@@ -502,33 +537,8 @@ class Game:
             else:
                 return self.cacti.sprites()[1].rect.left - self.cacti.sprites()[0].rect.right
 
-    def game_over_loop(self):
-        while self.game_over:
-            if pygame.display.get_surface() is None:
-                print("Couldn't load display surface")
-                self.game_quit = True
-                self.game_over = False
-            else:
-                for game_event in pygame.event.get():
-                    if game_event.type == pygame.QUIT:
-                        self.game_quit = True
-                        self.game_over = False
-                    if game_event.type == pygame.KEYDOWN:
-                        if game_event.key == pygame.K_ESCAPE:
-                            self.game_quit = True
-                            self.game_over = False
-
-                        if game_event.key == pygame.K_RETURN or game_event.key == pygame.K_SPACE:
-                            self.game_over = False
-                            self.__init__()
-            self.high_score.update(HIGH_SCORE)
-            if pygame.display.get_surface() is not None:
-                display_game_over_msg(self.retry_button_image, self.game_over_image)
-                if HIGH_SCORE != 0:
-                    self.high_score.draw()
-                    APP_SCREEN.blit(self.HI_image, self.HI_rect)
-                pygame.display.update()
-            CLOCK.tick(FPS)
+    def game_is_over(self):
+            return self.game_over
 
 
 def start_game():
