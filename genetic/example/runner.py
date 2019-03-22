@@ -10,6 +10,14 @@ genomeSize = 5
 mutateRatio = 0.1
 nbSteps = 5
 
+class myIndividual(individual):
+    idealScore = 5
+
+    def getScore(self) -> float:
+        rawScore = abs(sum(self.genome) - self.idealScore)  # range : 0-5
+        return 1 - rawScore / genomeSize
+
+
 def main():
 
     myGeneticAglo = algo_genetic(populationSize, genomeSize, mutateRatio)
@@ -25,14 +33,6 @@ def main():
         print(f"score de l'individu{individu} = {individu.score}")
 
 
-
-
-def fitness(population):
-    idealScore = 5
-
-    for individu in population:
-        rawScore = abs(sum(individu.genom) - idealScore) # range : 0-5
-        individu.score = 1 - rawScore/genomeSize
 
 
 

@@ -8,6 +8,7 @@ class individual:
     def __init__(self, gen: 'genome'):
         self.genome = gen
 
+
     def getScore(self):
         pass
 
