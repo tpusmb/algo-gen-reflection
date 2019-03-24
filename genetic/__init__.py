@@ -1,2 +1,2 @@
-from .algo_genetic import algo_genetic
-from .individual import individual
+from .algogenetic import AlgoGenetic
+from .individual import Individual
