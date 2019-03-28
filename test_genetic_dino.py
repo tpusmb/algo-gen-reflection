@@ -115,12 +115,13 @@ if __name__ == "__main__":
     controller = GameController(numbers_of_dino=NUMBER_OF_DINO)
     while True:
         if controller.game_is_over():
-
+            random.seed(None)  # Reset the seed to be pseudo-random
             dino_score = controller.get_saved_scores()
             for dino_id, dino_neurons in enumerate(dino_population):
                 dino_neurons.set_score(dino_score[dino_id])
             dino_population = genetic.step_paralleled(dino_population)
             controller.restart_game(NUMBER_OF_DINO)
+            random.seed(42)
         else:
             # update inputs
             game_speed.set_value(controller.get_speed() / 100.0)
