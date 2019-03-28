@@ -341,12 +341,14 @@ class Game:
         self.new_ground = Ground(-1 * self.game_speed)
         self.scb = Scoreboard()
         self.high_score = Scoreboard(width * 0.78)
+        self.nb_dino_board = Scoreboard(width * 0.5)
         self.counter = 0
         self.dinos = [Dino(i, 44, 47) for i in range(number_of_dino)]
         self.cacti = pygame.sprite.Group()
         self.pteras = pygame.sprite.Group()
         self.clouds = pygame.sprite.Group()
         self.last_obstacle = pygame.sprite.Group()
+        self.saved_scores = []
 
         Cactus.containers = self.cacti
         Ptera.containers = self.pteras
@@ -421,6 +423,7 @@ class Game:
         for dino in self.dinos:
             if dino.is_dead:
                 self.dinos.remove(dino)
+                self.saved_scores.append([dino.dino_id, dino.score])
                 if dino.score > HIGH_SCORE:
                     HIGH_SCORE = dino.score
                 if len(self.dinos) == 0:
@@ -472,6 +475,7 @@ class Game:
             self.new_ground.draw()
             self.clouds.draw(APP_SCREEN)
             self.scb.draw()
+            self.nb_dino_board.draw()
             if HIGH_SCORE != 0:
                 self.high_score.draw()
                 APP_SCREEN.blit(self.HI_image, self.HI_rect)
@@ -518,6 +522,7 @@ class Game:
         if len(self.dinos) > 0:
             self.scb.update(self.dinos[0].score)
         self.high_score.update(HIGH_SCORE)
+        self.nb_dino_board.update(len(self.dinos))
 
     def get_dino_with_id(self, dino_id):
         try:
@@ -587,6 +592,9 @@ class Game:
         except AttributeError:
             pass
         return width
+
+    def get_saved_scores(self):
+        return self.saved_scores
 
     def game_is_over(self):
             return self.game_over
