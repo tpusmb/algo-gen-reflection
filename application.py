@@ -49,6 +49,7 @@ class DinoGen:
         """
         pass
 
+
 if __name__ == "__main__":
     args = docopt(__doc__)
 

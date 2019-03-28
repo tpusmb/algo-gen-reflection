@@ -94,6 +94,13 @@ class GameController:
     def game_is_over(self):
         return self.game.game_is_over()
 
+    def get_saved_scores(self):
+        """
+
+        :return:(dict) key dino id value score
+        """
+        return self.game.get_saved_scores()
+
 
 if __name__ == "__main__":
     controller = GameController(2)

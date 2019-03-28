@@ -348,7 +348,7 @@ class Game:
         self.pteras = pygame.sprite.Group()
         self.clouds = pygame.sprite.Group()
         self.last_obstacle = pygame.sprite.Group()
-        self.saved_scores = []
+        self.saved_scores = {}
 
         Cactus.containers = self.cacti
         Ptera.containers = self.pteras
@@ -423,7 +423,7 @@ class Game:
         for dino in self.dinos:
             if dino.is_dead:
                 self.dinos.remove(dino)
-                self.saved_scores.append([dino.dino_id, dino.score])
+                self.saved_scores[dino.dino_id] = dino.score
                 if dino.score > HIGH_SCORE:
                     HIGH_SCORE = dino.score
                 if len(self.dinos) == 0:

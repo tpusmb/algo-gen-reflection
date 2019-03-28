@@ -47,7 +47,13 @@ class Neuron:
         self.bias_weight = random.uniform(-max_value, max_value)
         self.threshold = len(self.input_liste) * self.bias_weight
 
-        PYTHON_LOGGER.info(", ".join([str(weight) for weight in self.weight_liste]))
+    def get_weight_len(self):
+        """
+
+        :return:
+        """
+        #  + 1 for the bias
+        return len(self.input_liste) + 1
 
     def compute(self):
         """
