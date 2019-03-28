@@ -37,7 +37,8 @@ class AlgoGeneticByFunctions(AlgoGenetic):
         no mutation is done, therefore no gene is lost
         :return: 2 children from the reproduction
         """
-        return self.reproduction_fun(mate1, mate2, self.factory, self.crossover_ratio)
+        return self.reproduction_fun(mate1=mate1, mate2=mate2, factory=self.factory,
+                                     crossover_ratio=self.crossover_ratio)
 
     def mutation(self, population) -> 'population':
         """
@@ -105,8 +106,10 @@ def generic_selection_couple(potential_mates_pool: population) -> [Individual, I
     return mate1, mate2
 
 
-def uniform_crossover(mate1: Individual, mate2: Individual, factory: IndividualFactory, crossover_ratio=0.5)\
-        -> [Individual, Individual]:
+def uniform_crossover(**kwargs)-> [Individual, Individual]:
+    mate1 = kwargs.get('mate1')
+    mate2 = kwargs.get('mate2')
+    factory = kwargs.get('factory')
     genome1 = []
     genome2 = []
     assert len(mate1.genome) == len(mate2.genome)
@@ -120,8 +123,11 @@ def uniform_crossover(mate1: Individual, mate2: Individual, factory: IndividualF
     return factory.create_individual(genome1), factory.create_individual(genome2)
 
 
-def uniform_crossover_with_ratio(mate1: Individual, mate2: Individual, factory: IndividualFactory, crossover_ratio=0.5)\
-        -> [Individual, Individual]:
+def uniform_crossover_with_ratio(**kwargs)-> [Individual, Individual]:
+    mate1 = kwargs.get('mate1')
+    mate2 = kwargs.get('mate2')
+    factory = kwargs.get('factory')
+    crossover_ratio= kwargs.get('crossover_ratio')
     genome1 = []
     genome2 = []
     assert len(mate1.genome) == len(mate2.genome)
@@ -136,8 +142,10 @@ def uniform_crossover_with_ratio(mate1: Individual, mate2: Individual, factory: 
     return factory.create_individual(genome1), factory.create_individual(genome2)
 
 
-def single_point_crossover(mate1: Individual, mate2: Individual, factory: IndividualFactory, crossover_ratio=0.5)\
-        -> [Individual, Individual]:
+def single_point_crossover(**kwargs)-> [Individual, Individual]:
+    mate1 = kwargs.get('mate1')
+    mate2 = kwargs.get('mate2')
+    factory = kwargs.get('factory')
     genome1 = []
     genome2 = []
     assert len(mate1.genome) == len(mate2.genome)
@@ -151,8 +159,10 @@ def single_point_crossover(mate1: Individual, mate2: Individual, factory: Indivi
     return factory.create_individual(genome1), factory.create_individual(genome2)
 
 
-def dumb_crossover(mate1: Individual, mate2: Individual, factory: IndividualFactory, crossover_ratio=0.5)\
-        -> [Individual, Individual]:
+def dumb_crossover(**kwargs)-> [Individual, Individual]:
+    mate1 = kwargs.get('mate1')
+    mate2 = kwargs.get('mate2')
+    factory = kwargs.get('factory')
     return factory.create_individual(mate1.genome), factory.create_individual(mate2.genome)
 
 
