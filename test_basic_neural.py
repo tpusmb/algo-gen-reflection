@@ -36,7 +36,7 @@ if __name__ == "__main__":
     neuron_jump = Neuron(input_liste=input_list, max_value=1.0, activation_function=sigmoid)
     neuron_no_jump = Neuron(input_liste=input_list, max_value=1.0, activation_function=sigmoid)
 
-    controller = GameController()
+    controller = GameController(numbers_of_dino=1)
     while True:
         if controller.game_is_over():
             neuron_jump = Neuron(input_liste=input_list, max_value=1.0, activation_function=sigmoid)
@@ -47,5 +47,5 @@ if __name__ == "__main__":
             distance_next_obstacle.set_value(controller.get_distance_of_first_obstacle() / float(width))
             gap_between_obstacles.set_value(controller.get_distance_between_first_and_second_obstacle() / float(width))
             if neuron_jump.compute() > neuron_no_jump.compute():
-                controller.jump()
+                controller.jump(dino_id=0)
             time.sleep(0.1)

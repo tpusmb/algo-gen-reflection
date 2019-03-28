@@ -47,21 +47,21 @@ class GameController:
         Do jump action on the select dino
         :param dino_id:(int) id of the dino to jump id between 0 and number of dino in the game -1
         """
-        self.game.jump()
+        self.game.jump(dino_id)
 
     def duck(self, dino_id):
         """
         Make the select dino ducking
         :param dino_id:(int) id of the dino to duck id between 0 and number of dino in the game -1
         """
-        self.game.duck()
+        self.game.duck(dino_id)
 
     def stop_duck(self, dino_id):
         """
         stop the select dino to duck
         :param dino_id:(int) id of the dino to stop ducking id between 0 and number of dino in the game -1
         """
-        self.game.stop_duck()
+        self.game.stop_duck(dino_id)
 
     def is_ducking(self, dino_id):
         """
@@ -69,7 +69,7 @@ class GameController:
         :param dino_id:(int) id of the dino to get if is ducking id between 0 and number of dino in the game -1
         :return: (bool) True the dino is dunking else False
         """
-        return self.game.is_ducking()
+        return self.game.is_ducking(dino_id)
 
     def restart_game(self):
         self.game.restart_game()
