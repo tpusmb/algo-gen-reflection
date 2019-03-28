@@ -27,7 +27,13 @@ FOLDER_ABSOLUTE_PATH = os.path.normpath(os.path.dirname(os.path.abspath(__file__
 class Neuron:
 
     def __init__(self, input_liste, max_value, activation_function):
+        """
 
+        :param input_liste: (list of Inputs) Input for the neuron
+        :param max_value: (float) Max value for the weight
+        :param activation_function: (function with one parameter)
+                Activation function see the activation_function.py file
+        """
         for given_input in input_liste:
             if type(given_input) != Input:
                 raise TypeError("Given input is not Type Input")
@@ -45,27 +51,23 @@ class Neuron:
 
     def compute(self):
         """
-
-        :return:
+        Compute the neurone with the input list and use the activation function
+        :return:(float) Out put of the neurone
         """
         # Set bias node
         res = -self.threshold
         for given_input, weight in zip(self.input_liste, self.weight_liste):
-            print("inptut: {}, weight {}".format(given_input.get_value(), weight))
             res += given_input.get_value() * weight
-        print("******/")
-        print(res)
         return self.activation_function(res)
-
-    def set_threshold(self, new_bias_weight):
-        self.bias_weight = new_bias_weight
-        self.threshold = len(self.input_liste) * new_bias_weight
 
 
 if __name__ == "__main__":
     from neural import classic_thread_shot
+    # Creat inputs
     a = Input(value=0)
     b = Input(value=0)
+    # Set in the list
     input_list = [a, b]
+    # Give the pointer if the inputs
     neuron = Neuron(input_liste=input_list, max_value=1.0, activation_function=classic_thread_shot)
     print(neuron.compute())

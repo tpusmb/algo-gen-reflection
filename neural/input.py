@@ -25,23 +25,26 @@ FOLDER_ABSOLUTE_PATH = os.path.normpath(os.path.dirname(os.path.abspath(__file__
 
 class Input:
 
-    def __init__(self, value=1):
+    def __init__(self, value=1.0):
         """
 
-        :param value: Value between 0 and 1
+        :param value: (float) Value between 0 and 1
         """
         if value > 1 or value < 0:
             raise ValueError("The given value not between 0 and 1")
         self.value = value
 
     def get_value(self):
+        """
+        :return: (float) value of the input
+        """
         return self.value
 
     def set_value(self, value):
         """
-
-        :param value: value between 0 and 1
-        :return:
+        Set the value of the input note if the input value is bigger than 1 we set the value to 1
+        If the is smaller than 0 we set to 0
+        :param value: (float) value between 0 and 1
         """
         if value > 1:
             value = 1.0
