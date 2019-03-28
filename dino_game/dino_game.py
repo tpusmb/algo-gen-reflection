@@ -29,7 +29,7 @@ CHECKPOINT_SOUND = pygame.mixer.Sound(os.path.join(FOLDER_ABSOLUTE_PATH, 'sprite
 
 
 def load_image(name, size_x=-1, size_y=-1, color_key=None):
-    fullname = os.path.join('sprites', name)
+    fullname = os.path.join(FOLDER_ABSOLUTE_PATH, 'sprites', name)
     loading_image = pygame.image.load(fullname)
     loading_image = loading_image.convert()
     if color_key is not None:
@@ -44,7 +44,7 @@ def load_image(name, size_x=-1, size_y=-1, color_key=None):
 
 
 def load_sprite_sheet(sheet_name, nx, ny, scale_x=-1, scale_y=-1, color_key=None):
-    fullname = os.path.join('sprites', sheet_name)
+    fullname = os.path.join(FOLDER_ABSOLUTE_PATH, 'sprites', sheet_name)
     sheet = pygame.image.load(fullname)
     sheet = sheet.convert()
 
@@ -532,21 +532,28 @@ class Game:
         return self.player_dino.isDucking
 
     def get_distance_of_first_obstacle(self):
-        if len(self.cacti) != 0 and self.cacti.sprites()[0].rect.left - self.player_dino.rect.right >= 0:
-            return self.cacti.sprites()[0].rect.left - self.player_dino.rect.right
-        elif len(self.cacti) > 1:
-            return self.cacti.sprites()[1].rect.left
-        else:
-            return width
+        try:
+            if len(self.cacti) != 0 and self.cacti.sprites()[0].rect.left - self.player_dino.rect.right >= 0:
+                return self.cacti.sprites()[0].rect.left - self.player_dino.rect.right
+            elif len(self.cacti) > 1:
+                return self.cacti.sprites()[1].rect.left
+        except AttributeError:
+            pass
+
+        return width
 
     def get_distance_between_first_and_second_obstacle(self):
-        if len(self.cacti) < 2:
-            return width
-        else:
-            if self.cacti.sprites()[0].rect.left - self.player_dino.rect.right <= 0:
+        try:
+            if len(self.cacti) < 2:
                 return width
             else:
-                return self.cacti.sprites()[1].rect.left - self.cacti.sprites()[0].rect.right
+                if self.cacti.sprites()[0].rect.left - self.player_dino.rect.right <= 0:
+                    return width
+                else:
+                    return self.cacti.sprites()[1].rect.left - self.cacti.sprites()[0].rect.right
+        except AttributeError:
+            pass
+        return width
 
     def game_is_over(self):
             return self.game_over

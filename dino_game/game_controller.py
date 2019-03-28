@@ -55,7 +55,7 @@ class GameController:
         return self.game.get_distance_of_first_obstacle()
 
     def get_distance_between_first_and_second_obstacle(self):
-        return self.game.get_distance_between_first_and_second_obstacle
+        return self.game.get_distance_between_first_and_second_obstacle()
 
     def game_is_over(self):
         return self.game.game_is_over()
