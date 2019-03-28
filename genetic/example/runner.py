@@ -4,11 +4,12 @@ from genetic.individual import genome
 populationSize = 100
 genomeSize = 5
 mutateRatio = 0.001
+crossover_ratio = 0.7
 nbSteps = 1000
 
 
 class MyIndividual(Individual):
-    idealScore = genomeSize
+    idealScore = 2.5
 
     def get_score(self) -> float:
         raw_score = abs(sum(self.genome) - self.idealScore)  # range : 0-5
@@ -24,7 +25,8 @@ class MyIndividualFactory(IndividualFactory):
 def main():
     my_factory = MyIndividualFactory()
     my_genetic_algo = AlgoGeneticByFunctions(populationSize, genomeSize, mutateRatio, my_factory, random_uniform_init,
-                                             generic_selection_couple, uniform_crossover, mutation_gaussian)
+                                             generic_selection_couple, uniform_crossover, mutation_gaussian,
+                                             crossover_ratio)
 
     my_population = my_genetic_algo.init_population()
 

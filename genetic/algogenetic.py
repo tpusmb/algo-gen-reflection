@@ -7,10 +7,12 @@ population = List[Individual]
 
 class AlgoGenetic:
 
-    def __init__(self, population_size: int, genome_size: int, mutate_ratio: float, factory: IndividualFactory):
+    def __init__(self, population_size: int, genome_size: int, mutate_ratio: float, crossover_ratio: float,
+                 factory: IndividualFactory):
         self.population_size = population_size
         self.genome_size = genome_size
         self.mutate_ratio = mutate_ratio
+        self.crossover_ratio = crossover_ratio
         self.factory = factory
 
     @abstractmethod
