@@ -9,13 +9,15 @@ population = List[Individual]
 class AlgoGenetic:
 
     def __init__(self, population_size: int, genome_size: int, mutate_ratio: float, crossover_ratio: float,
-                 factory: IndividualFactory):
+                 factory: IndividualFactory, range_min=-1, range_max=1):
         assert genome_size != 0
         self.population_size = population_size
         self.genome_size = genome_size
         self.mutate_ratio = mutate_ratio
         self.crossover_ratio = crossover_ratio
         self.factory = factory
+        self.range_min = range_min
+        self.range_max = range_max
 
         self.pool = ThreadPool(processes=4)
 

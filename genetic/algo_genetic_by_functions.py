@@ -13,15 +13,16 @@ class AlgoGeneticByFunctions(AlgoGenetic):
 
     def __init__(self, population_size: int, genome_size: int, mutate_ratio: float,
                  factory: IndividualFactory, init_population_fun: Callable, select_mates_fun: Callable,
-                 reproduction_fun: Callable, mutation_fun: Callable, crossover_ratio=0.5):
-        super().__init__(population_size, genome_size, mutate_ratio, crossover_ratio, factory),
+                 reproduction_fun: Callable, mutation_fun: Callable, crossover_ratio=0.5, range_min=-1, range_max=1):
+        super().__init__(population_size, genome_size, mutate_ratio, crossover_ratio, factory, range_min, range_max),
         self.init_population_fun = init_population_fun
         self.select_mates_fun = select_mates_fun
         self.reproduction_fun = reproduction_fun
         self.mutation_fun = mutation_fun
 
     def init_population(self) -> 'population':
-        return self.init_population_fun(self.population_size, self.genome_size, self.factory)
+        return self.init_population_fun(self.population_size, self.genome_size, self.factory, self.range_min,
+                                        self.range_max)
 
     def select_mates(self, potential_mates_pool) -> 'population':
         """
@@ -46,12 +47,14 @@ class AlgoGeneticByFunctions(AlgoGenetic):
         this method keep the population size
         :return: a mutated population
         """
-        return self.mutation_fun(population, self.mutate_ratio)
+        return self.mutation_fun(population, self.range_min, self.range_max, self.mutate_ratio)
 
 
-def random_uniform_init(population_size: int, genome_size: int, factory: IndividualFactory):
+def random_uniform_init(population_size: int, genome_size: int, factory: IndividualFactory, range_min, range_max):
     """
     Initialize a population by giving them random genome
+    :param range_min: min range of neurals weight
+    :param range_max: max range of neurals weight
     :param population_size: the size of the population created
     :param genome_size: the size of genome of each individual
     :param factory: the factory used to create all individual of the population
@@ -61,7 +64,7 @@ def random_uniform_init(population_size: int, genome_size: int, factory: Individ
     for i in range(population_size):
         genome = []
         for j in range(genome_size):
-            genome.append(random.uniform(0, 1))
+            genome.append(random.uniform(range_min, range_max))
         res.append(factory.create_individual(genome))
     return res
 
@@ -78,7 +81,7 @@ def generic_selection_individual(potential_mates_pool: population) -> Individual
 
     my_pool = {}  # we retrieve all score and normalized them
     for ind in potential_mates_pool:
-        my_pool[ind] = ind.get_score() / total_score
+         my_pool[ind] = ind.get_score() / total_score
 
     # sort pool by fitness (descending)
     my_ordered_pool = OrderedDict(sorted(my_pool.items(), key=operator.itemgetter(1), reverse=True))
@@ -166,18 +169,20 @@ def dumb_crossover(**kwargs)-> [Individual, Individual]:
     return factory.create_individual(mate1.genome), factory.create_individual(mate2.genome)
 
 
-def mutation_uniform(population: population, mutate_ratio=0.1) -> population:
+def mutation_uniform(population: population, range_min, range_max, mutate_ratio=0.1) -> population:
     for ind in population:
         for i in range(len(ind.genome)):
             if random.uniform(0, 1) <= mutate_ratio:
-                ind.genome[i] = random.uniform(0, 1)
+                ind.genome[i] = random.uniform(range_min, range_max)
     return population
 
 
-def mutation_gaussian(population: population, mutate_ratio=0.1, standard_deviation=0.25) -> population:
+def mutation_gaussian(population: population, range_min, range_max, mutate_ratio=0.1, standard_deviation=0.25) \
+        -> population:
     for ind in population:
         for i in range(len(ind.genome)):
             if random.uniform(0, 1) <= mutate_ratio:
                 new_value = random.gauss(ind.genome[i], standard_deviation)
-                ind.genome[i] = max(min(new_value, 0), 1)  # clamp the value between 0 and 1
+                # clamp the value between range_min and range_max
+                ind.genome[i] = max(min(new_value, range_min), range_max)
     return population
