@@ -346,7 +346,6 @@ class Game:
         self.clouds = pygame.sprite.Group()
         self.last_obstacle = pygame.sprite.Group()
 
-        Dino.containers = self.dinos
         Cactus.containers = self.cacti
         Ptera.containers = self.pteras
         Cloud.containers = self.clouds
@@ -364,10 +363,8 @@ class Game:
         self.HI_rect.top = height * 0.1
         self.HI_rect.left = width * 0.73
 
-        for i in range(0, 10):
+        for i in range(0, 100):
             self.dinos.append(Dino(44, 47))
-
-        print("Dinos: {}".format(self.dinos))
 
     def game_loop(self):
         while not self.game_quit:
@@ -423,12 +420,10 @@ class Game:
     def dinos_loop(self):
         global HIGH_SCORE
         for dino in self.dinos:
-            dino.draw()
-            dino.update()
-            if dino.score > HIGH_SCORE:
-                HIGH_SCORE = dino.score
             if dino.is_dead:
                 self.dinos.remove(dino)
+                if dino.score > HIGH_SCORE:
+                    HIGH_SCORE = dino.score
                 if len(self.dinos) == 0:
                     self.game_over = True
 
@@ -437,7 +432,7 @@ class Game:
             c.movement[0] = -1 * self.game_speed
             for dino in self.dinos:
                 if pygame.sprite.collide_mask(dino, c):
-                    dino.isDead = True
+                    dino.is_dead = True
                     if pygame.mixer.get_init() is not None:
                         DIE_SOUND.play()
 
@@ -458,7 +453,7 @@ class Game:
             p.movement[0] = -1 * self.game_speed
             for dino in self.dinos:
                 if pygame.sprite.collide_mask(dino, p):
-                    dino.isDead = True
+                    dino.is_dead = True
                     if pygame.mixer.get_init() is not None:
                         DIE_SOUND.play()
 
@@ -483,6 +478,8 @@ class Game:
                 APP_SCREEN.blit(self.HI_image, self.HI_rect)
             self.cacti.draw(APP_SCREEN)
             self.pteras.draw(APP_SCREEN)
+            for dino in self.dinos:
+                dino.draw()
             pygame.display.update()
 
     def game_over_loop(self):
@@ -513,11 +510,14 @@ class Game:
             CLOCK.tick(FPS)
 
     def update_everything(self):
+        for dino in self.dinos:
+            dino.update()
         self.cacti.update()
         self.pteras.update()
         self.clouds.update()
         self.new_ground.update()
-        self.scb.update(self.dinos[0].score)
+        if len(self.dinos) > 0:
+            self.scb.update(self.dinos[0].score)
         self.high_score.update(HIGH_SCORE)
 
     def jump(self, dino_id):
