@@ -105,7 +105,7 @@ def extract_digits(number):
 
 
 class Dino:
-    def __init__(self, size_x=-1, size_y=-1):
+    def __init__(self, dino_id, size_x=-1, size_y=-1):
         self.images, self.rect = load_sprite_sheet('dino.png', 5, 1, size_x, size_y, -1)
         self.images1, self.rect1 = load_sprite_sheet('dino_ducking.png', 2, 1, 59, size_y, -1)
         self.rect.bottom = int(0.98 * height)
@@ -120,6 +120,7 @@ class Dino:
         self.is_blinking = False
         self.movement = [0, 0]
         self.jump_speed = 11.5
+        self.dino_id = dino_id
 
         self.stand_pos_width = self.rect.width
         self.duck_pos_width = self.rect1.width
@@ -289,7 +290,7 @@ class Scoreboard:
 
 
 def intro_screen():
-    temp_dino = Dino(44, 47)
+    temp_dino = Dino(1, 44, 47)
     temp_dino.is_blinking = True
     game_start = False
 
@@ -331,16 +332,17 @@ def intro_screen():
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, number_of_dino):
         self.game_speed = 4
         self.start_menu = False
         self.game_over = False
         self.game_quit = False
+        self.number_of_dino = number_of_dino
         self.new_ground = Ground(-1 * self.game_speed)
         self.scb = Scoreboard()
         self.high_score = Scoreboard(width * 0.78)
         self.counter = 0
-        self.dinos = []
+        self.dinos = [Dino(i, 44, 47) for i in range(number_of_dino)]
         self.cacti = pygame.sprite.Group()
         self.pteras = pygame.sprite.Group()
         self.clouds = pygame.sprite.Group()
@@ -362,9 +364,6 @@ class Game:
         self.HI_image.blit(self.temp_images[11], self.temp_rect)
         self.HI_rect.top = height * 0.1
         self.HI_rect.left = width * 0.73
-
-        for i in range(0, 100):
-            self.dinos.append(Dino(44, 47))
 
     def game_loop(self):
         while not self.game_quit:
@@ -499,7 +498,7 @@ class Game:
                             self.game_over = False
 
                         if game_event.key == pygame.K_RETURN or game_event.key == pygame.K_SPACE:
-                            self.restart_game()
+                            self.restart_game(self.number_of_dino)
             self.high_score.update(HIGH_SCORE)
             if pygame.display.get_surface() is not None:
                 display_game_over_msg(self.retry_button_image, self.game_over_image)
@@ -520,8 +519,16 @@ class Game:
             self.scb.update(self.dinos[0].score)
         self.high_score.update(HIGH_SCORE)
 
+    def get_dino_with_id(self, dino_id):
+        try:
+            return list(filter(lambda dino: dino.dino_id == dino_id, self.dinos))[0]
+        except IndexError:
+            return None
+
     def jump(self, dino_id):
-        dino = self.dinos[dino_id]
+        dino = self.get_dino_with_id(dino_id)
+        if dino is None:
+            return
         if dino.rect.bottom == int(0.98 * height):
             dino.is_jumping = True
             if pygame.mixer.get_init() is not None:
@@ -529,22 +536,33 @@ class Game:
                 dino.movement[1] = -1 * dino.jump_speed
 
     def duck(self, dino_id):
-        dino = self.dinos[dino_id]
+        dino = self.get_dino_with_id(dino_id)
+        if dino is None:
+            return
         if not (dino.is_jumping and dino.is_dead):
-            dino.is_ducking = True
+                dino.is_ducking = True
 
     def stop_duck(self, dino_id):
-        self.dinos[dino_id].is_ducking = False
+        dino = self.get_dino_with_id(dino_id)
+        if dino is None:
+            return
+        dino.is_ducking = False
 
-    def restart_game(self):
+    def dino_is_dead(self, dino_id):
+        return self.get_dino_with_id(dino_id) is None
+
+    def restart_game(self, nb_dino):
         self.game_over = False
-        self.__init__()
+        self.__init__(nb_dino)
 
     def get_speed(self):
         return self.game_speed
 
     def is_ducking(self, dino_id):
-        return self.dinos[dino_id].is_ducking
+        dino = self.get_dino_with_id(dino_id)
+        if dino is None:
+            return False
+        return dino.is_ducking
 
     def get_distance_of_first_obstacle(self):
         try:
@@ -577,7 +595,7 @@ class Game:
 def start_game():
     is_game_quit = intro_screen()
     if not is_game_quit:
-        game = Game()
+        game = Game(1)
         game.game_loop()
 
 

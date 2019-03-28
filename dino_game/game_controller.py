@@ -37,7 +37,7 @@ class GameController:
         :param numbers_of_dino: (int) number of dino to creat in the game
         """
         # Start the game
-        self.game = Game()
+        self.game = Game(numbers_of_dino)
         # Launch the game in one thread
         thread = Thread(target=self.game.game_loop, args=())
         thread.start()
@@ -71,8 +71,16 @@ class GameController:
         """
         return self.game.is_ducking(dino_id)
 
-    def restart_game(self):
-        self.game.restart_game()
+    def is_dead(self, dino_id):
+        """
+
+        :param dino_id:
+        :return:
+        """
+        self.game.dino_is_dead(dino_id)
+
+    def restart_game(self, numbers_of_dino):
+        self.game.restart_game(numbers_of_dino)
 
     def get_speed(self):
         return self.game.get_speed()
@@ -91,7 +99,7 @@ if __name__ == "__main__":
     controller = GameController(2)
     while True:
         if controller.game_is_over():
-            controller.restart_game()
+            controller.restart_game(2)
         else:
             if controller.is_ducking(1):
                 controller.stop_duck(1)
