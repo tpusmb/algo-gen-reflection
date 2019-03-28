@@ -10,7 +10,6 @@ class Individual:
     def __init__(self, gen: genome):
         self.genome = gen
 
-
     @abstractmethod
     def get_score(self) -> float:
         """

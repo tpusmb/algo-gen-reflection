@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from multiprocessing.pool import ThreadPool
 
 from genetic.individual import *
 
@@ -9,14 +10,17 @@ class AlgoGenetic:
 
     def __init__(self, population_size: int, genome_size: int, mutate_ratio: float, crossover_ratio: float,
                  factory: IndividualFactory):
+        assert genome_size != 0
         self.population_size = population_size
         self.genome_size = genome_size
         self.mutate_ratio = mutate_ratio
         self.crossover_ratio = crossover_ratio
         self.factory = factory
 
+        self.pool = ThreadPool(processes=4)
+
     @abstractmethod
-    def init_population(self) -> 'population':
+    def init_population(self) -> population:
         pass
 
     @abstractmethod
@@ -38,7 +42,7 @@ class AlgoGenetic:
         pass
 
     @abstractmethod
-    def mutation(self, population) -> 'population':
+    def mutation(self, population) -> population:
         """
         Mutate a population by changing his genome
         this method keep the population size
@@ -46,7 +50,7 @@ class AlgoGenetic:
         """
         pass
 
-    def step(self, previous_population) -> 'population':
+    def step(self, previous_population: population) -> population:
         """
         Bring the population a step forward evolution
         """
@@ -57,3 +61,6 @@ class AlgoGenetic:
             children.append(child1)
             children.append(child2)
         return self.mutation(children)
+
+    def step_paralleled(self, previous_population: population) -> population:
+        return self.pool.apply(self.step, [previous_population])

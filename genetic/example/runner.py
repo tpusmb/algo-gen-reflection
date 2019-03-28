@@ -9,11 +9,15 @@ nbSteps = 1000
 
 
 class MyIndividual(Individual):
-    idealScore = 2.5
+    idealScore = genomeSize
+    score_dict = {}
 
     def get_score(self) -> float:
-        raw_score = abs(sum(self.genome) - self.idealScore)  # range : 0-5
-        return 1 - raw_score / genomeSize
+        sum_genome = sum(self.genome)
+        if sum_genome not in self.score_dict:
+            raw_score = abs(sum_genome - self.idealScore)  # range : 0-5
+            self.score_dict[sum_genome] = 1 - raw_score / genomeSize
+        return self.score_dict[sum_genome]
 
 
 class MyIndividualFactory(IndividualFactory):
@@ -31,13 +35,13 @@ def main():
     my_population = my_genetic_algo.init_population()
 
     for i in range(nbSteps):
-        my_population = my_genetic_algo.step(my_population)
+        my_population = my_genetic_algo.step_paralleled(my_population)
         mean_score = 0
         for individu in my_population:
             mean_score += individu.get_score()
         mean_score /= len(my_population)
         if ((i + 1) % 10) == 0:
-            print(f"step {i + 1} : {mean_score}")
+            print(f"step {i + 1} : {mean_score}")   # display only multiple of 10 population
     for individu in my_population:
         print(f"individu's score {individu} = {individu.get_score()}")
     print("done")

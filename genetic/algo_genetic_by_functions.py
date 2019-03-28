@@ -6,7 +6,7 @@ from collections import OrderedDict
 from typing import Callable
 
 from genetic import *
-from genetic.algogenetic import population, IndividualFactory
+from genetic.algo_genetic import population, IndividualFactory
 
 
 class AlgoGeneticByFunctions(AlgoGenetic):
@@ -106,7 +106,7 @@ def generic_selection_couple(potential_mates_pool: population) -> [Individual, I
     return mate1, mate2
 
 
-def uniform_crossover(**kwargs)-> [Individual, Individual]:
+def uniform_crossover(**kwargs) -> [Individual, Individual]:
     mate1 = kwargs.get('mate1')
     mate2 = kwargs.get('mate2')
     factory = kwargs.get('factory')
@@ -123,7 +123,7 @@ def uniform_crossover(**kwargs)-> [Individual, Individual]:
     return factory.create_individual(genome1), factory.create_individual(genome2)
 
 
-def uniform_crossover_with_ratio(**kwargs)-> [Individual, Individual]:
+def uniform_crossover_with_ratio(**kwargs) -> [Individual, Individual]:
     mate1 = kwargs.get('mate1')
     mate2 = kwargs.get('mate2')
     factory = kwargs.get('factory')
@@ -142,7 +142,7 @@ def uniform_crossover_with_ratio(**kwargs)-> [Individual, Individual]:
     return factory.create_individual(genome1), factory.create_individual(genome2)
 
 
-def single_point_crossover(**kwargs)-> [Individual, Individual]:
+def single_point_crossover(**kwargs) -> [Individual, Individual]:
     mate1 = kwargs.get('mate1')
     mate2 = kwargs.get('mate2')
     factory = kwargs.get('factory')
@@ -164,7 +164,6 @@ def dumb_crossover(**kwargs)-> [Individual, Individual]:
     mate2 = kwargs.get('mate2')
     factory = kwargs.get('factory')
     return factory.create_individual(mate1.genome), factory.create_individual(mate2.genome)
-
 
 
 def mutation_uniform(population: population, mutate_ratio=0.1) -> population:
