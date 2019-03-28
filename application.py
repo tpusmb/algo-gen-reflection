@@ -5,11 +5,11 @@
 Main app
 
 Usage:
-   application.py [--manual]
+   application.py < [--manual]
 
 Options:
     -h --help     Show this screen.
-    --manual      Manual mode (you play the game
+    --manual      Manual mode (you play the game)
 
 """
 
@@ -17,6 +17,7 @@ from __future__ import absolute_import
 
 import logging.handlers
 import os
+import configparser
 
 from docopt import docopt
 
@@ -37,6 +38,16 @@ PYTHON_LOGGER.setLevel(logging.DEBUG)
 
 # Absolute path to the folder location of this python file
 FOLDER_ABSOLUTE_PATH = os.path.normpath(os.path.dirname(os.path.abspath(__file__)))
+
+
+class DinoGen:
+
+    def __init__(self, absolute_path_config_path):
+        """
+
+        :param absolute_path_config_path: (string) absolute path of the config file
+        """
+        pass
 
 if __name__ == "__main__":
     args = docopt(__doc__)

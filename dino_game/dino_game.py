@@ -105,7 +105,7 @@ def extract_digits(number):
 
 
 class Dino:
-    def __init__(self, size_x=-1, size_y=-1):
+    def __init__(self, dino_id, size_x=-1, size_y=-1):
         self.images, self.rect = load_sprite_sheet('dino.png', 5, 1, size_x, size_y, -1)
         self.images1, self.rect1 = load_sprite_sheet('dino_ducking.png', 2, 1, 59, size_y, -1)
         self.rect.bottom = int(0.98 * height)
@@ -114,12 +114,13 @@ class Dino:
         self.index = 0
         self.counter = 0
         self.score = 0
-        self.isJumping = False
-        self.isDead = False
-        self.isDucking = False
-        self.isBlinking = False
+        self.is_jumping = False
+        self.is_dead = False
+        self.is_ducking = False
+        self.is_blinking = False
         self.movement = [0, 0]
-        self.jumpSpeed = 11.5
+        self.jump_speed = 11.5
+        self.dino_id = dino_id
 
         self.stand_pos_width = self.rect.width
         self.duck_pos_width = self.rect1.width
@@ -130,15 +131,15 @@ class Dino:
     def check_bounds(self):
         if self.rect.bottom > int(0.98 * height):
             self.rect.bottom = int(0.98 * height)
-            self.isJumping = False
+            self.is_jumping = False
 
     def update(self):
-        if self.isJumping:
+        if self.is_jumping:
             self.movement[1] = self.movement[1] + GRAVITY
 
-        if self.isJumping:
+        if self.is_jumping:
             self.index = 0
-        elif self.isBlinking:
+        elif self.is_blinking:
             if self.index == 0:
                 if self.counter % 400 == 399:
                     self.index = (self.index + 1) % 2
@@ -146,17 +147,17 @@ class Dino:
                 if self.counter % 20 == 19:
                     self.index = (self.index + 1) % 2
 
-        elif self.isDucking:
+        elif self.is_ducking:
             if self.counter % 5 == 0:
                 self.index = (self.index + 1) % 2
         else:
             if self.counter % 5 == 0:
                 self.index = (self.index + 1) % 2 + 2
 
-        if self.isDead:
+        if self.is_dead:
             self.index = 4
 
-        if not self.isDucking:
+        if not self.is_ducking:
             self.image = self.images[self.index]
             self.rect.width = self.stand_pos_width
         else:
@@ -166,7 +167,7 @@ class Dino:
         self.rect = self.rect.move(self.movement)
         self.check_bounds()
 
-        if not self.isDead and self.counter % 7 == 6 and self.isBlinking is False:
+        if not self.is_dead and self.counter % 7 == 6 and self.is_blinking is False:
             self.score += 1
             if self.score % 100 == 0 and self.score != 0:
                 if pygame.mixer.get_init() is not None:
@@ -289,8 +290,8 @@ class Scoreboard:
 
 
 def intro_screen():
-    temp_dino = Dino(44, 47)
-    temp_dino.isBlinking = True
+    temp_dino = Dino(1, 44, 47)
+    temp_dino.is_blinking = True
     game_start = False
 
     temp_ground, temp_ground_rect = load_sprite_sheet('ground.png', 15, 1, -1, -1, -1)
@@ -310,37 +311,38 @@ def intro_screen():
                     return True
                 if game_event.type == pygame.KEYDOWN:
                     if game_event.key == pygame.K_SPACE or game_event.key == pygame.K_UP:
-                        temp_dino.isJumping = True
-                        temp_dino.isBlinking = False
-                        temp_dino.movement[1] = -1 * temp_dino.jumpSpeed
+                        temp_dino.is_jumping = True
+                        temp_dino.is_blinking = False
+                        temp_dino.movement[1] = -1 * temp_dino.jump_speed
 
         temp_dino.update()
 
         if pygame.display.get_surface() is not None:
             APP_SCREEN.fill(BACKGROUND_COLOR)
             APP_SCREEN.blit(temp_ground[0], temp_ground_rect)
-            if temp_dino.isBlinking:
+            if temp_dino.is_blinking:
                 APP_SCREEN.blit(logo, logo_rect)
             temp_dino.draw()
 
             pygame.display.update()
 
         CLOCK.tick(FPS)
-        if temp_dino.isJumping is False and temp_dino.isBlinking is False:
+        if temp_dino.is_jumping is False and temp_dino.is_blinking is False:
             game_start = True
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, number_of_dino):
         self.game_speed = 4
         self.start_menu = False
         self.game_over = False
         self.game_quit = False
-        self.player_dino = Dino(44, 47)
+        self.number_of_dino = number_of_dino
         self.new_ground = Ground(-1 * self.game_speed)
         self.scb = Scoreboard()
         self.high_score = Scoreboard(width * 0.78)
         self.counter = 0
+        self.dinos = [Dino(i, 44, 47) for i in range(number_of_dino)]
         self.cacti = pygame.sprite.Group()
         self.pteras = pygame.sprite.Group()
         self.clouds = pygame.sprite.Group()
@@ -364,7 +366,6 @@ class Game:
         self.HI_rect.left = width * 0.73
 
     def game_loop(self):
-        global HIGH_SCORE
         while not self.game_quit:
             while self.start_menu:
                 pass
@@ -376,17 +377,13 @@ class Game:
                 else:
                     self.key_event_loop()
 
+                self.dinos_loop()
                 self.cactis_loop()
                 # self.pteras_loop()
                 self.clouds_loop()
                 self.update_everything()
                 self.ground_loop()
                 CLOCK.tick(FPS)
-
-                if self.player_dino.isDead:
-                    self.game_over = True
-                    if self.player_dino.score > HIGH_SCORE:
-                        HIGH_SCORE = self.player_dino.score
 
                 if self.counter % 700 == 699:
                     self.new_ground.speed -= 1
@@ -410,22 +407,33 @@ class Game:
 
             if game_event.type == pygame.KEYDOWN:
                 if game_event.key == pygame.K_SPACE:
-                    self.jump()
+                    self.jump(0)
 
                 if game_event.key == pygame.K_DOWN:
-                    self.duck()
+                    self.duck(0)
 
             if game_event.type == pygame.KEYUP:
                 if game_event.key == pygame.K_DOWN:
-                    self.stop_duck()
+                    self.stop_duck(0)
+
+    def dinos_loop(self):
+        global HIGH_SCORE
+        for dino in self.dinos:
+            if dino.is_dead:
+                self.dinos.remove(dino)
+                if dino.score > HIGH_SCORE:
+                    HIGH_SCORE = dino.score
+                if len(self.dinos) == 0:
+                    self.game_over = True
 
     def cactis_loop(self):
         for c in self.cacti:
             c.movement[0] = -1 * self.game_speed
-            if pygame.sprite.collide_mask(self.player_dino, c):
-                self.player_dino.isDead = True
-                if pygame.mixer.get_init() is not None:
-                    DIE_SOUND.play()
+            for dino in self.dinos:
+                if pygame.sprite.collide_mask(dino, c):
+                    dino.is_dead = True
+                    if pygame.mixer.get_init() is not None:
+                        DIE_SOUND.play()
 
         if len(self.cacti) < 2:
             if len(self.cacti) == 0:
@@ -442,10 +450,11 @@ class Game:
     def pteras_loop(self):
         for p in self.pteras:
             p.movement[0] = -1 * self.game_speed
-            if pygame.sprite.collide_mask(self.player_dino, p):
-                self.player_dino.isDead = True
-                if pygame.mixer.get_init() is not None:
-                    DIE_SOUND.play()
+            for dino in self.dinos:
+                if pygame.sprite.collide_mask(dino, p):
+                    dino.is_dead = True
+                    if pygame.mixer.get_init() is not None:
+                        DIE_SOUND.play()
 
         if len(self.pteras) == 0 and random.randrange(0, 200) == 10 and self.counter > 500:
             for l in self.last_obstacle:
@@ -468,7 +477,8 @@ class Game:
                 APP_SCREEN.blit(self.HI_image, self.HI_rect)
             self.cacti.draw(APP_SCREEN)
             self.pteras.draw(APP_SCREEN)
-            self.player_dino.draw()
+            for dino in self.dinos:
+                dino.draw()
             pygame.display.update()
 
     def game_over_loop(self):
@@ -488,7 +498,7 @@ class Game:
                             self.game_over = False
 
                         if game_event.key == pygame.K_RETURN or game_event.key == pygame.K_SPACE:
-                            self.restart_game()
+                            self.restart_game(self.number_of_dino)
             self.high_score.update(HIGH_SCORE)
             if pygame.display.get_surface() is not None:
                 display_game_over_msg(self.retry_button_image, self.game_over_image)
@@ -499,42 +509,65 @@ class Game:
             CLOCK.tick(FPS)
 
     def update_everything(self):
-        self.player_dino.update()
+        for dino in self.dinos:
+            dino.update()
         self.cacti.update()
         self.pteras.update()
         self.clouds.update()
         self.new_ground.update()
-        self.scb.update(self.player_dino.score)
+        if len(self.dinos) > 0:
+            self.scb.update(self.dinos[0].score)
         self.high_score.update(HIGH_SCORE)
 
-    def jump(self):
-        if self.player_dino.rect.bottom == int(0.98 * height):
-            self.player_dino.isJumping = True
+    def get_dino_with_id(self, dino_id):
+        try:
+            return list(filter(lambda dino: dino.dino_id == dino_id, self.dinos))[0]
+        except IndexError:
+            return None
+
+    def jump(self, dino_id):
+        dino = self.get_dino_with_id(dino_id)
+        if dino is None:
+            return
+        if dino.rect.bottom == int(0.98 * height):
+            dino.is_jumping = True
             if pygame.mixer.get_init() is not None:
                 JUMP_SOUND.play()
-                self.player_dino.movement[1] = -1 * self.player_dino.jumpSpeed
+                dino.movement[1] = -1 * dino.jump_speed
 
-    def duck(self):
-        if not (self.player_dino.isJumping and self.player_dino.isDead):
-            self.player_dino.isDucking = True
+    def duck(self, dino_id):
+        dino = self.get_dino_with_id(dino_id)
+        if dino is None:
+            return
+        if not (dino.is_jumping and dino.is_dead):
+                dino.is_ducking = True
 
-    def stop_duck(self):
-        self.player_dino.isDucking = False
+    def stop_duck(self, dino_id):
+        dino = self.get_dino_with_id(dino_id)
+        if dino is None:
+            return
+        dino.is_ducking = False
 
-    def restart_game(self):
+    def dino_is_dead(self, dino_id):
+        return self.get_dino_with_id(dino_id) is None
+
+    def restart_game(self, nb_dino):
         self.game_over = False
-        self.__init__()
+        self.__init__(nb_dino)
 
     def get_speed(self):
         return self.game_speed
 
-    def is_ducking(self):
-        return self.player_dino.isDucking
+    def is_ducking(self, dino_id):
+        dino = self.get_dino_with_id(dino_id)
+        if dino is None:
+            return False
+        return dino.is_ducking
 
     def get_distance_of_first_obstacle(self):
         try:
-            if len(self.cacti) != 0 and self.cacti.sprites()[0].rect.left - self.player_dino.rect.right >= 0:
-                return self.cacti.sprites()[0].rect.left - self.player_dino.rect.right
+            if len(self.cacti) != 0 and self.cacti.sprites()[0].rect.left - self.dinos[0].rect.right >= 0:
+                return self.cacti.sprites()[0].rect.left - self.dinos[0].rect.right
             elif len(self.cacti) > 1:
                 return self.cacti.sprites()[1].rect.left
         except AttributeError:
@@ -547,7 +580,7 @@ class Game:
             if len(self.cacti) < 2:
                 return width
             else:
-                if self.cacti.sprites()[0].rect.left - self.player_dino.rect.right <= 0:
+                if self.cacti.sprites()[0].rect.left - self.dinos[0].rect.right <= 0:
                     return width
                 else:
                     return self.cacti.sprites()[1].rect.left - self.cacti.sprites()[0].rect.right
@@ -562,7 +595,7 @@ class Game:
 def start_game():
     is_game_quit = intro_screen()
     if not is_game_quit:
-        game = Game()
+        game = Game(1)
         game.game_loop()
 
 
