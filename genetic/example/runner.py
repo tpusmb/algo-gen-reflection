@@ -1,4 +1,4 @@
-from genetic.algogeneticbyfunctions import *
+from genetic.algo_genetic_by_functions import *
 from genetic.individual import genome
 
 populationSize = 100

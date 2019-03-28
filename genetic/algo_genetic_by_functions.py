@@ -48,6 +48,23 @@ class AlgoGeneticByFunctions(AlgoGenetic):
         return self.mutation_fun(population, self.mutate_ratio)
 
 
+def random_uniform_init(population_size: int, genome_size: int, factory: IndividualFactory):
+    """
+    Initialize a population by giving them random genome
+    :param population_size: the size of the population created
+    :param genome_size: the size of genome of each individual
+    :param factory: the factory used to create all individual of the population
+    :return:
+    """
+    res = []
+    for i in range(population_size):
+        genome = []
+        for j in range(genome_size):
+            genome.append(random.uniform(0, 1))
+        res.append(factory.create_individual(genome))
+    return res
+
+
 def generic_selection_individual(potential_mates_pool: population) -> Individual:
     """
     Generic selection as defined by : https://en.wikipedia.org/wiki/Selection_(genetic_algorithm)
@@ -79,23 +96,6 @@ def generic_selection_individual(potential_mates_pool: population) -> Individual
     print("ERROR, no value found", file=sys.stderr)
 
 
-def random_uniform_init(population_size: int, genome_size: int, factory: IndividualFactory):
-    """
-    Initialize a population by giving them random genome
-    :param population_size: the size of the population created
-    :param genome_size: the size of genome of each individual
-    :param factory: the factory used to create all individual of the population
-    :return:
-    """
-    res = []
-    for i in range(population_size):
-        genome = []
-        for j in range(genome_size):
-            genome.append(random.uniform(0, 1))
-        res.append(factory.create_individual(genome))
-    return res
-
-
 def generic_selection_couple(potential_mates_pool: population) -> [Individual, Individual]:
     assert len(potential_mates_pool) >= 2
     mate1 = generic_selection_individual(potential_mates_pool)
@@ -116,6 +116,35 @@ def uniform_crossover(mate1: Individual, mate2: Individual, factory: IndividualF
         else:
             genome1.append(mate2.genome[i])
             genome2.append(mate1.genome[i])
+    return factory.create_individual(genome1), factory.create_individual(genome2)
+
+
+def uniform_crossover_with_ratio(mate1: Individual, mate2: Individual, factory: IndividualFactory, crossover_ratio = 0.5)-> [Individual, Individual]:
+    genome1 = []
+    genome2 = []
+    assert len(mate1.genome) == len(mate2.genome)
+    for i in range(len(mate1.genome)):
+        # child 1 inherit from parent1 according to crossover_ratio
+        if random.uniform(0, 1) < crossover_ratio:
+            genome1.append(mate1.genome[i])
+            genome2.append(mate2.genome[i])
+        else:
+            genome1.append(mate2.genome[i])
+            genome2.append(mate1.genome[i])
+    return factory.create_individual(genome1), factory.create_individual(genome2)
+
+
+def single_point_crossover(mate1: Individual, mate2: Individual, factory: IndividualFactory)-> [Individual, Individual]:
+    genome1 = []
+    genome2 = []
+    assert len(mate1.genome) == len(mate2.genome)
+    k = random.randint(0, len(mate1.genome))    # crossover point
+    for i in range(0, k):
+        genome1.append(mate2.genome[i])
+        genome2.append(mate1.genome[i])
+    for i in range(k, len(mate1.genome)):
+        genome1.append(mate1.genome[i])
+        genome2.append(mate2.genome[i])
     return factory.create_individual(genome1), factory.create_individual(genome2)
 
 
