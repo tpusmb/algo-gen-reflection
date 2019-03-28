@@ -31,7 +31,7 @@ def sigmoid(value):
     :param value: las somme des produit des entrée avec poid du neuron
     :return: une valeur bornée entre 0 et 1
     """
-    return 1.0 / (1.0 + math.exp(value * -1))
+    return 1.0 / (1.0 + math.exp(value * -4.9))
 
 
 def classic_thread_shot(value):

@@ -34,29 +34,38 @@ class Neuron:
 
         # We append the bias node with allway +1 value
         self.input_liste = input_liste
-        # Generate the input weight + 1 we ad the bias node
-        self.weight_liste = [random.uniform(-max_value, max_value) for _ in range(len(self.input_liste) + 1)]
+        # Generate the input weight
+        self.weight_liste = [random.uniform(-max_value, max_value) for _ in range(len(self.input_liste))]
         # Add the bias node
         self.activation_function = activation_function
-        self.threshold = len(self.input_liste) * self.weight_liste[-1]
+        self.bias_weight = random.uniform(-max_value, max_value)
+        self.threshold = len(self.input_liste) * self.bias_weight
+
+        PYTHON_LOGGER.info(", ".join([str(weight) for weight in self.weight_liste]))
 
     def compute(self):
         """
 
         :return:
         """
+        # Set bias node
         res = -self.threshold
-        for given_input, weight in zip(input_list, self.weight_liste):
+        for given_input, weight in zip(self.input_liste, self.weight_liste):
+            print("inptut: {}, weight {}".format(given_input.get_value(), weight))
             res += given_input.get_value() * weight
-
+        print("******/")
+        print(res)
         return self.activation_function(res)
+
+    def set_threshold(self, new_bias_weight):
+        self.bias_weight = new_bias_weight
+        self.threshold = len(self.input_liste) * new_bias_weight
 
 
 if __name__ == "__main__":
     from neural import classic_thread_shot
-    a = Input(0)
-    b = Input(0)
+    a = Input(value=0)
+    b = Input(value=0)
     input_list = [a, b]
-    neuron = Neuron(input_list, 1.0, classic_thread_shot)
-    neuron.compute()
-    print("dd")
+    neuron = Neuron(input_liste=input_list, max_value=1.0, activation_function=classic_thread_shot)
+    print(neuron.compute())

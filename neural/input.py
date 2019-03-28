@@ -43,6 +43,8 @@ class Input:
         :param value: value between 0 and 1
         :return:
         """
-        if value > 1 or value < 0:
-            raise ValueError("The given value not between 0 and 1")
+        if value > 1:
+            value = 1.0
+        elif value < 0:
+            value = 0.0
         self.value = value
