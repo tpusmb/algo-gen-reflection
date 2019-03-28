@@ -3,12 +3,12 @@
 
 from __future__ import absolute_import
 
+import logging.handlers
+import os
 import time
 from threading import Thread
+
 from dino_game import Game
-import os
-import timeit
-import logging.handlers
 
 PYTHON_LOGGER = logging.getLogger(__name__)
 if not os.path.exists("log"):
@@ -28,28 +28,54 @@ FOLDER_ABSOLUTE_PATH = os.path.normpath(os.path.dirname(os.path.abspath(__file__
 
 
 class GameController:
-    def __init__(self):
+    """
+    Class to control actions in the games
+    """
+
+    def __init__(self, numbers_of_dino):
+        """
+        :param numbers_of_dino: (int) number of dino to creat in the game
+        """
+        # Start the game
         self.game = Game()
+        # Launch the game in one thread
         thread = Thread(target=self.game.game_loop, args=())
         thread.start()
 
-    def jump(self):
+    def jump(self, dino_id):
+        """
+        Do jump action on the select dino
+        :param dino_id:(int) id of the dino to jump id between 0 and number of dino in the game -1
+        """
         self.game.jump()
 
-    def duck(self):
+    def duck(self, dino_id):
+        """
+        Make the select dino ducking
+        :param dino_id:(int) id of the dino to duck id between 0 and number of dino in the game -1
+        """
         self.game.duck()
 
-    def stop_duck(self):
+    def stop_duck(self, dino_id):
+        """
+        stop the select dino to duck
+        :param dino_id:(int) id of the dino to stop ducking id between 0 and number of dino in the game -1
+        """
         self.game.stop_duck()
+
+    def is_ducking(self, dino_id):
+        """
+        Get if the select dino is ducking
+        :param dino_id:(int) id of the dino to get if is ducking id between 0 and number of dino in the game -1
+        :return: (bool) True the dino is dunking else False
+        """
+        return self.game.is_ducking()
 
     def restart_game(self):
         self.game.restart_game()
 
     def get_speed(self):
         return self.game.get_speed()
-
-    def is_ducking(self):
-        return self.game.is_ducking()
 
     def get_distance_of_first_obstacle(self):
         return self.game.get_distance_of_first_obstacle()
@@ -62,15 +88,14 @@ class GameController:
 
 
 if __name__ == "__main__":
-    controller = GameController()
+    controller = GameController(2)
     while True:
         if controller.game_is_over():
             controller.restart_game()
         else:
-            if controller.is_ducking():
-                controller.stop_duck()
+            if controller.is_ducking(1):
+                controller.stop_duck(1)
             else:
-                controller.duck()
-            controller.jump()
+                controller.duck(1)
+            controller.jump(1)
             time.sleep(0.1)
-
