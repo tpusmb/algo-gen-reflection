@@ -148,11 +148,18 @@ def single_point_crossover(mate1: Individual, mate2: Individual, factory: Indivi
     return factory.create_individual(genome1), factory.create_individual(genome2)
 
 
-def mutation(population: population, mutate_ratio=0.1, standard_deviation=0.25) -> population:
+def mutation_uniform(population: population, mutate_ratio=0.1) -> population:
     for ind in population:
         for i in range(len(ind.genome)):
             if random.uniform(0, 1) <= mutate_ratio:
                 ind.genome[i] = random.uniform(0, 1)
-                # new_value = random.gauss(ind.genome[i], standard_deviation)
-                # ind.genome[i] = max(min(new_value, 0), 1)  # clamp the value between 0 and 1
+    return population
+
+
+def mutation_gaussian(population: population, mutate_ratio=0.1, standard_deviation=0.25) -> population:
+    for ind in population:
+        for i in range(len(ind.genome)):
+            if random.uniform(0, 1) <= mutate_ratio:
+                new_value = random.gauss(ind.genome[i], standard_deviation)
+                ind.genome[i] = max(min(new_value, 0), 1)  # clamp the value between 0 and 1
     return population

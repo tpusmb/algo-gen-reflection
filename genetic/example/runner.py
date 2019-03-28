@@ -3,7 +3,7 @@ from genetic.individual import genome
 
 populationSize = 100
 genomeSize = 5
-mutateRatio = 0.0001
+mutateRatio = 0.001
 nbSteps = 1000
 
 
@@ -24,7 +24,7 @@ class MyIndividualFactory(IndividualFactory):
 def main():
     my_factory = MyIndividualFactory()
     my_genetic_algo = AlgoGeneticByFunctions(populationSize, genomeSize, mutateRatio, my_factory, random_uniform_init,
-                                             generic_selection_couple, uniform_crossover, mutation)
+                                             generic_selection_couple, uniform_crossover, mutation_gaussian)
 
     my_population = my_genetic_algo.init_population()
 
