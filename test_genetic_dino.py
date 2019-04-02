@@ -51,6 +51,7 @@ class DinoNeurons(Individual):
             index_gen += 1
         # bias node for jump neuron
         self.neuron_jump.bias_weight = gen[index_gen]
+        self.neuron_jump.threshold = len(self.neuron_jump.input_liste) * self.neuron_jump.bias_weight
         index_gen += 1
 
         # no jump neuron - 1 to remove the bias node
@@ -61,7 +62,7 @@ class DinoNeurons(Individual):
 
         # bias node for jump neuron
         self.neuron_no_jump.bias_weight = gen[index_gen]
-
+        self.neuron_no_jump.threshold = len(self.neuron_no_jump.input_liste) * self.neuron_no_jump.bias_weight
         self.dino_score = None
 
     def set_score(self, score):
@@ -119,11 +120,11 @@ if __name__ == "__main__":
     # dino_neurones_list = [DinoNeurons(input_list) for _ in range(10)]
     genetic = AlgoGeneticByFunctions(population_size=NUMBER_OF_DINO,
                                      genome_size=(len(input_list) + 1) * 2,
-                                     mutate_ratio=0.0001,
+                                     mutate_ratio=0.1,
                                      factory=DinoFactory(input_list),
                                      init_population_fun=random_uniform_init,
                                      select_mates_fun=generic_selection_couple,
-                                     reproduction_fun=uniform_crossover_with_ratio,
+                                     reproduction_fun=uniform_crossover,
                                      mutation_fun=mutation_gaussian,
                                      crossover_ratio=0.9,
                                      range_min=-1.0,
@@ -147,7 +148,6 @@ if __name__ == "__main__":
             gap_between_obstacles.set_value(controller.get_distance_between_first_and_second_obstacle() / float(width))
 
             for dino_id, dino_neurons in enumerate(dino_population):
-
                 if not controller.is_dead(dino_id) and dino_neurons.need_to_jump():
                     controller.jump(dino_id)
             time.sleep(0.1)

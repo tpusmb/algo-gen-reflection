@@ -100,6 +100,20 @@ def generic_selection_individual(potential_mates_pool: population) -> Individual
     print("ERROR, no value found", file=sys.stderr)
 
 
+def select_only_best_individual(potential_mates_pool: population) -> Individual:
+        """
+        Generic selection as defined by : https://en.wikipedia.org/wiki/Selection_(genetic_algorithm)
+        :param potential_mates_pool:
+        :return:
+        """
+        max_score = 0
+        for ind in potential_mates_pool:
+            if ind.get_score() >= max_score:
+                max_score = ind.get_score()
+                best = ind
+        return best
+
+
 def generic_selection_couple(potential_mates_pool: population) -> [Individual, Individual]:
     assert len(potential_mates_pool) >= 2
     mate1 = generic_selection_individual(potential_mates_pool)
@@ -107,6 +121,38 @@ def generic_selection_couple(potential_mates_pool: population) -> [Individual, I
     while mate2 == mate1:
         mate2 = generic_selection_individual(potential_mates_pool)
     return mate1, mate2
+
+
+def select_best(potential_mates_pool: population) -> [Individual, Individual]:
+    assert len(potential_mates_pool) >= 2
+    mate1 = select_only_best_individual(potential_mates_pool)
+    return mate1, mate1
+
+
+def select_best_couple(potential_mates_pool: population) -> [Individual, Individual]:
+    total_score = 0
+    for ind in potential_mates_pool:
+        total_score += ind.get_score()
+
+    my_pool = {}  # we retrieve all score and normalized them
+    for ind in potential_mates_pool:
+         my_pool[ind] = ind.get_score() / total_score
+
+    # sort pool by fitness (descending)
+    my_ordered_pool = OrderedDict(sorted(my_pool.items(), key=operator.itemgetter(1), reverse=True))
+
+    # build a histogram
+    pool_sum = 0
+    for ind in my_ordered_pool:
+        my_ordered_pool[ind] += pool_sum
+        pool_sum = my_ordered_pool[ind]
+    assert math.isclose(pool_sum, 1)
+
+    R = random.random()
+    for ind, fitness_sum in my_ordered_pool.items():
+        if fitness_sum > R:
+            return ind
+    print("ERROR, no value found", file=sys.stderr)
 
 
 def uniform_crossover(**kwargs) -> [Individual, Individual]:
