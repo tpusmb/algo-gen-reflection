@@ -10,7 +10,7 @@ pygame.init()
 
 FOLDER_ABSOLUTE_PATH = os.path.normpath(os.path.dirname(os.path.abspath(__file__)))
 SCREEN_SIZE = (width, height) = (600, 150)
-FPS = 60
+FPS = 200
 GRAVITY = 0.6
 
 BLACK = (0, 0, 0)
@@ -24,6 +24,7 @@ APP_SCREEN = pygame.display.set_mode(SCREEN_SIZE)
 CLOCK = pygame.time.Clock()
 pygame.display.set_caption("Dino Run")
 
+IS_SOUND_ENABLE = False
 JUMP_SOUND = pygame.mixer.Sound(os.path.join(FOLDER_ABSOLUTE_PATH, 'sprites', 'jump.wav'))
 DIE_SOUND = pygame.mixer.Sound(os.path.join(FOLDER_ABSOLUTE_PATH, 'sprites', 'die.wav'))
 CHECKPOINT_SOUND = pygame.mixer.Sound(os.path.join(FOLDER_ABSOLUTE_PATH, 'sprites', 'checkPoint.wav'))
@@ -172,7 +173,8 @@ class Dino:
             self.score += 1
             if self.score % 100 == 0 and self.score != 0:
                 if pygame.mixer.get_init() is not None:
-                    CHECKPOINT_SOUND.play()
+                    if IS_SOUND_ENABLE:
+                        CHECKPOINT_SOUND.play()
 
         self.counter = (self.counter + 1)
 
@@ -440,7 +442,8 @@ class Game:
                 if pygame.sprite.collide_mask(dino, c):
                     dino.is_dead = True
                     if pygame.mixer.get_init() is not None:
-                        DIE_SOUND.play()
+                        if IS_SOUND_ENABLE:
+                            DIE_SOUND.play()
 
         if len(self.cacti) < 2:
             if len(self.cacti) == 0:
@@ -461,7 +464,8 @@ class Game:
                 if pygame.sprite.collide_mask(dino, p):
                     dino.is_dead = True
                     if pygame.mixer.get_init() is not None:
-                        DIE_SOUND.play()
+                        if IS_SOUND_ENABLE:
+                            DIE_SOUND.play()
 
         if len(self.pteras) == 0 and random.randrange(0, 200) == 10 and self.counter > 500:
             for l in self.last_obstacle:
@@ -543,8 +547,9 @@ class Game:
         if dino.rect.bottom == int(0.98 * height):
             dino.is_jumping = True
             if pygame.mixer.get_init() is not None:
-                JUMP_SOUND.play()
                 dino.movement[1] = -1 * dino.jump_speed
+                if IS_SOUND_ENABLE:
+                    JUMP_SOUND.play()
 
     def duck(self, dino_id):
         dino = self.get_dino_with_id(dino_id)
