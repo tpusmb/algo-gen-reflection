@@ -85,6 +85,12 @@ class GameController:
     def get_speed(self):
         return self.game.get_speed()
 
+    def get_high_score(self):
+        return self.game.get_high_score()
+
+    def get_nb_iteration(self):
+        return self.game.get_nb_iteration()
+
     def get_distance_of_first_obstacle(self):
         return self.game.get_distance_of_first_obstacle()
 
