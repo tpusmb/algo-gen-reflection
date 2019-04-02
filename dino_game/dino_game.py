@@ -18,6 +18,7 @@ WHITE = (255, 255, 255)
 BACKGROUND_COLOR = (235, 235, 235)
 
 HIGH_SCORE = 0
+NB_ITERATION = 0
 
 APP_SCREEN = pygame.display.set_mode(SCREEN_SIZE)
 CLOCK = pygame.time.Clock()
@@ -333,6 +334,8 @@ def intro_screen():
 
 class Game:
     def __init__(self, number_of_dino):
+        global NB_ITERATION
+        NB_ITERATION += 1
         self.game_speed = 4
         self.start_menu = False
         self.game_over = False
@@ -342,6 +345,7 @@ class Game:
         self.scb = Scoreboard()
         self.high_score = Scoreboard(width * 0.78)
         self.nb_dino_board = Scoreboard(width * 0.5)
+        self.nb_iteration_board = Scoreboard(width * 0.3)
         self.counter = 0
         self.dinos = [Dino(i, 44, 47) for i in range(number_of_dino)]
         self.cacti = pygame.sprite.Group()
@@ -476,6 +480,7 @@ class Game:
             self.clouds.draw(APP_SCREEN)
             self.scb.draw()
             self.nb_dino_board.draw()
+            self.nb_iteration_board.draw()
             if HIGH_SCORE != 0:
                 self.high_score.draw()
                 APP_SCREEN.blit(self.HI_image, self.HI_rect)
@@ -523,6 +528,7 @@ class Game:
             self.scb.update(self.dinos[0].score)
         self.high_score.update(HIGH_SCORE)
         self.nb_dino_board.update(len(self.dinos))
+        self.nb_iteration_board.update(NB_ITERATION)
 
     def get_dino_with_id(self, dino_id):
         try:

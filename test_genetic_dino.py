@@ -26,7 +26,7 @@ PYTHON_LOGGER.setLevel(logging.DEBUG)
 
 # Absolute path to the folder location of this python file
 FOLDER_ABSOLUTE_PATH = os.path.normpath(os.path.dirname(os.path.abspath(__file__)))
-NUMBER_OF_DINO = 100
+NUMBER_OF_DINO = 200
 
 
 class DinoNeurons(Individual):
