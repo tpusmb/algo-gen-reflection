@@ -158,6 +158,7 @@ class DinoGen:
         self.max_score = 0
         self.ecart_type = 0
         self.best_dino_id = None
+        self.hight_score = -1
 
     @staticmethod
     def write_best_genom(dino_to_save, score_best_dino, nb_iteration):
@@ -210,7 +211,8 @@ class DinoGen:
                     dino_neurons.set_score(dino_score[dino_id])
 
                 self.state_analyse(dino_score)
-                if self.max_score >= controller.get_high_score():
+                if self.max_score > self.hight_score:
+                    self.hight_score = self.max_score
                     self.write_best_genom(self.dino_population[self.best_dino_id], dino_score[self.best_dino_id],
                                           controller.get_nb_iteration())
                 self.dino_population = self.genetic.step_paralleled(self.dino_population)
