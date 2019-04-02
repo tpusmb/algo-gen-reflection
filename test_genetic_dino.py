@@ -96,8 +96,9 @@ class DinoFactory(IndividualFactory):
 def write_best_genom(d_population, scores, nb_iteration):
     best_score = 0
     best_score_index = -1
-    for i in (0, len(d_population) - 1):
+    for i in range(len(d_population) - 1):
         best_score_index += 1
+        PYTHON_LOGGER.info("Score de {} = {}".format(i, scores[i]))
         if scores[i] > best_score:
             best_score = scores[i]
     data = {}
