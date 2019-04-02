@@ -86,7 +86,7 @@ class GameController:
         return self.game.get_speed()
 
     def get_high_score(self):
-        return self.game.get_high_score()
+        return self.game.get_high_score().score
 
     def get_nb_iteration(self):
         return self.game.get_nb_iteration()

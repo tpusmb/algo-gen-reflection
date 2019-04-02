@@ -17,11 +17,13 @@ Options:
 from __future__ import absolute_import
 
 import configparser
+import json
 import logging.handlers
 import os
 import time
 
 from docopt import docopt
+from math import sqrt
 
 from dino_game import GameController, width
 from genetic import Individual
@@ -138,7 +140,7 @@ class DinoGen:
         self.population_size = int(self.config_reader.General["population_size"])
         self.genetic = AlgoGeneticByFunctions(population_size=self.population_size,
                                               genome_size=(len(self.input_list) + 1) * 2,
-                                              mutate_ratio=0.0001,
+                                              mutate_ratio=0.1,
                                               factory=DinoFactory(self.input_list),
                                               init_population_fun=eval(config_reader.Genetic["init_population_fun"]),
                                               select_mates_fun=eval(config_reader.Genetic["select_mates_fun"]),
@@ -146,20 +148,71 @@ class DinoGen:
                                                   config_reader.Genetic["reproduction_fun"]),
                                               mutation_fun=eval(config_reader.Genetic["mutation_fun"]),
                                               crossover_ratio=0.9,
-                                              range_min=-5.0,
-                                              range_max=5.0)
+                                              range_min=-1.0,
+                                              range_max=1.0)
         self.dino_population = self.genetic.init_population()
         self.app_finish = False
+        self.variance = 0
+        self.average_score = 0
+        self.min_score = 0
+        self.max_score = 0
+        self.ecart_type = 0
+        self.best_dino_id = None
+
+    @staticmethod
+    def write_best_genom(dino_to_save, score_best_dino, nb_iteration):
+
+        data = {'score': score_best_dino, 'genom': dino_to_save.genome}
+        with open('best_score{}.txt'.format(nb_iteration), 'w') as outfile:
+            json.dump(data, outfile)
+
+    def state_analyse(self, dino_score):
+        """
+
+        :param dino_score: (list of int) all score of the dino population
+        :return:
+        """
+        self.average_score = 0
+        self.variance = 0
+        self.min_score = -1
+        self.max_score = 0
+        self.ecart_type = 0
+        for dino_id, dino_neurons in enumerate(self.dino_population):
+            self.average_score += dino_score[dino_id]
+            if dino_score[dino_id] > self.max_score:
+                self.max_score = dino_score[dino_id]
+                self.best_dino_id = dino_id
+            if dino_score[dino_id] < self.min_score or self.min_score == -1:
+                self.min_score = dino_score[dino_id]
+
+        for dino_id, dino_neurons in enumerate(self.dino_population):
+            self.variance += (dino_score[dino_id] - self.average_score) * (dino_score[dino_id] - self.average_score)
+
+        self.average_score = self.average_score / self.population_size
+        self.variance = self.variance / self.population_size
+        self.ecart_type = sqrt(self.variance)
+        PYTHON_LOGGER.info("Average score = {}".format(self.average_score))
+        PYTHON_LOGGER.info("Ecart type = {}".format(self.ecart_type))
+        PYTHON_LOGGER.info("Max Score = {}".format(self.max_score))
+        PYTHON_LOGGER.info("Min Score = {}".format(self.min_score))
+        PYTHON_LOGGER.info("Best Dino id = {}".format(self.best_dino_id))
 
     def run(self):
 
         controller = GameController(numbers_of_dino=self.population_size)
 
-        while not self.app_finish:
+        while True:
             if controller.game_is_over():
+
+                PYTHON_LOGGER.info("****End of iteration {}****".format(controller.get_nb_iteration()))
                 dino_score = controller.get_saved_scores()
                 for dino_id, dino_neurons in enumerate(self.dino_population):
                     dino_neurons.set_score(dino_score[dino_id])
+
+                self.state_analyse(dino_score)
+                if self.max_score >= controller.get_high_score():
+                    self.write_best_genom(self.dino_population[self.best_dino_id], dino_score[self.best_dino_id],
+                                          controller.get_nb_iteration())
                 self.dino_population = self.genetic.step_paralleled(self.dino_population)
                 controller.restart_game(self.population_size)
             else:
@@ -170,10 +223,9 @@ class DinoGen:
                     controller.get_distance_between_first_and_second_obstacle() / float(width))
 
                 for dino_id, dino_neurons in enumerate(self.dino_population):
-
                     if not controller.is_dead(dino_id) and dino_neurons.need_to_jump():
                         controller.jump(dino_id)
-                time.sleep(0.1)
+                time.sleep(0.01)
 
     def stop(self):
 

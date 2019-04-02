@@ -3,6 +3,7 @@
 
 from __future__ import absolute_import
 
+import json
 import logging.handlers
 import os
 import time
@@ -46,23 +47,19 @@ class DinoNeurons(Individual):
         index_gen = 0
         # jump neuron - 1 to remove the bias node
         for index_weight in range(self.neuron_jump.get_weight_len() - 1):
-            #print("Weight {} jump: {}".format(index_weight, gen[index_gen]))
             self.neuron_jump.weight_liste[index_weight] = gen[index_gen]
             index_gen += 1
         # bias node for jump neuron
-        self.neuron_jump.bias_weight = gen[index_gen]
-        self.neuron_jump.threshold = len(self.neuron_jump.input_liste) * self.neuron_jump.bias_weight
+        self.neuron_jump.set_threshold(gen[index_gen])
         index_gen += 1
 
         # no jump neuron - 1 to remove the bias node
         for index_weight in range(self.neuron_no_jump.get_weight_len() - 1):
-            #print("Weight {} no jump: {}".format(index_weight, gen[index_gen]))
             self.neuron_no_jump.weight_liste[index_weight] = gen[index_gen]
             index_gen += 1
 
         # bias node for jump neuron
-        self.neuron_no_jump.bias_weight = gen[index_gen]
-        self.neuron_no_jump.threshold = len(self.neuron_no_jump.input_liste) * self.neuron_no_jump.bias_weight
+        self.neuron_no_jump.set_threshold(gen[index_gen])
         self.dino_score = None
 
     def set_score(self, score):
@@ -91,6 +88,23 @@ class DinoFactory(IndividualFactory):
     def create_individual(self, gen: genome):
 
         return DinoNeurons(self.inputs_list, gen)
+
+
+def write_best_genom(d_population, scores, nb_iteration):
+    best_score = 0
+    best_score_index = -1
+    for i in range(len(d_population) - 1):
+        best_score_index += 1
+        PYTHON_LOGGER.info("Score de {} = {}".format(i, scores[i]))
+        if scores[i] > best_score:
+            best_score = scores[i]
+    data = {}
+    data['score'] = []
+    data['genom'] = []
+    data['score'].append(best_score)
+    data['genom'].append(d_population[best_score_index].genome)
+    with open('best_score{}.txt'.format(nb_iteration), 'w') as outfile:
+        json.dump(data, outfile)
 
 
 if __name__ == "__main__":
@@ -131,6 +145,7 @@ if __name__ == "__main__":
                     maxScore = dino_score[dino_id]
                 if dino_score[dino_id] < minScore or minScore == -1:
                     minScore = dino_score[dino_id]
+            write_best_genom(dino_population, dino_score, controller.get_nb_iteration())
             averageScore = averageScore/NUMBER_OF_DINO
             print("average score = {}".format(averageScore))
             etendue = maxScore-minScore
