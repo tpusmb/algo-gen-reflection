@@ -55,6 +55,14 @@ class Neuron:
         #  + 1 for the bias
         return len(self.input_liste) + 1
 
+    def set_threshold(self, bias_weight):
+        """
+
+        :return:
+        """
+        self.bias_weight = bias_weight
+        self.threshold = len(self.input_liste) * self.bias_weight
+
     def compute(self):
         """
         Compute the neurone with the input list and use the activation function
