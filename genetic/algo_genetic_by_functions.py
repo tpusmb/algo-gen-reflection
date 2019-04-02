@@ -117,9 +117,9 @@ def select_only_best_individual(potential_mates_pool: population) -> Individual:
 def generic_selection_couple(potential_mates_pool: population) -> [Individual, Individual]:
     assert len(potential_mates_pool) >= 2
     mate1 = generic_selection_individual(potential_mates_pool)
+    potential_mates_pool.remove(mate1)
     mate2 = generic_selection_individual(potential_mates_pool)
-    while mate2 == mate1:
-        mate2 = generic_selection_individual(potential_mates_pool)
+    assert mate1 != mate2
     return mate1, mate2
 
 
