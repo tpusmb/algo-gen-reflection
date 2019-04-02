@@ -569,6 +569,12 @@ class Game:
     def get_speed(self):
         return self.game_speed
 
+    def get_high_score(self):
+        return self.high_score
+
+    def get_nb_iteration(self):
+        return NB_ITERATION
+
     def is_ducking(self, dino_id):
         dino = self.get_dino_with_id(dino_id)
         if dino is None:
