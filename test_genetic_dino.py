@@ -6,6 +6,7 @@ from __future__ import absolute_import
 import logging.handlers
 import os
 import time
+import json
 
 from neural import Neuron, Input
 from genetic.algo_genetic_by_functions import *
@@ -91,6 +92,22 @@ class DinoFactory(IndividualFactory):
         return DinoNeurons(self.inputs_list, gen)
 
 
+def write_best_genom(d_population, scores, nb_iteration):
+    best_score = 0
+    best_score_index = -1
+    for i in (0, len(d_population) - 1):
+        best_score_index += 1
+        if scores[i] > best_score:
+            best_score = scores[i]
+    data = {}
+    data['score'] = []
+    data['genom'] = []
+    data['score'].append(best_score)
+    data['genom'].append(d_population[best_score_index].genome)
+    with open('best_score{}.txt'.format(nb_iteration), 'w') as outfile:
+        json.dump(data, outfile)
+
+
 if __name__ == "__main__":
     from neural import sigmoid
     from dino_game import GameController, width
@@ -119,6 +136,7 @@ if __name__ == "__main__":
             dino_score = controller.get_saved_scores()
             for dino_id, dino_neurons in enumerate(dino_population):
                 dino_neurons.set_score(dino_score[dino_id])
+            write_best_genom(dino_population, dino_score, controller.get_nb_iteration())
             dino_population = genetic.step_paralleled(dino_population)
             controller.restart_game(NUMBER_OF_DINO)
             random.seed(42)
