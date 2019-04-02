@@ -137,8 +137,29 @@ if __name__ == "__main__":
             for dino_id, dino_neurons in enumerate(dino_population):
                 variance += (dino_score[dino_id]-averageScore)*(dino_score[dino_id]-averageScore)
             variance = variance/NUMBER_OF_DINO
-            ecartType = sqrt(variance)
-            print("écart type = {}".format(ecartType))
+            standart_deviation = sqrt(variance)
+            print("standart deviation = {}".format(standart_deviation))
+
+            ## REFLEXIVITYYY ##
+            if standart_deviation > 20:
+                mutate_ratio = 0    # There is a good improvement so we don't want to loose him
+            elif standart_deviation < 5:
+                mutate_ratio = 0.3  # we want to change something
+            else:
+                mutate_ratio = 0.1  # Standart
+
+            AlgoGeneticByFunctions(population_size=NUMBER_OF_DINO,
+                                   genome_size=(len(input_list) + 1) * 2,
+                                   mutate_ratio=mutate_ratio,
+                                   factory=DinoFactory(input_list),
+                                   init_population_fun=random_uniform_init,
+                                   select_mates_fun=generic_selection_couple,
+                                   reproduction_fun=uniform_crossover,
+                                   mutation_fun=mutation_gaussian,
+                                   crossover_ratio=0.9,
+                                   range_min=-1.0,
+                                   range_max=1.0)
+
 
 
             dino_population = genetic.step_paralleled(dino_population)
