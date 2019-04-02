@@ -30,9 +30,17 @@ class MyIndividualFactory(IndividualFactory):
 
 def main():
     my_factory = MyIndividualFactory()
-    my_genetic_algo = AlgoGeneticByFunctions(populationSize, genomeSize, mutateRatio, my_factory, random_uniform_init,
-                                             generic_selection_couple, uniform_crossover, mutation_gaussian,
-                                             crossover_ratio, range_min, range_max)
+    my_genetic_algo = AlgoGeneticByFunctions(population_size=populationSize,
+                                     genome_size=genomeSize,
+                                     mutate_ratio=0,
+                                     factory=my_factory,
+                                     init_population_fun=random_uniform_init,
+                                     select_mates_fun=select_best,
+                                     reproduction_fun=dumb_crossover,
+                                     mutation_fun=mutation_gaussian,
+                                     crossover_ratio=0.9,
+                                     range_min=-1.0,
+                                     range_max=1.0)
 
     my_population = my_genetic_algo.init_population()
 
