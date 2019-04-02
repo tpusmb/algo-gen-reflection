@@ -27,7 +27,7 @@ PYTHON_LOGGER.setLevel(logging.DEBUG)
 
 # Absolute path to the folder location of this python file
 FOLDER_ABSOLUTE_PATH = os.path.normpath(os.path.dirname(os.path.abspath(__file__)))
-NUMBER_OF_DINO = 200
+NUMBER_OF_DINO = 50
 
 
 class DinoNeurons(Individual):
@@ -151,4 +151,4 @@ if __name__ == "__main__":
             for dino_id, dino_neurons in enumerate(dino_population):
                 if not controller.is_dead(dino_id) and dino_neurons.need_to_jump():
                     controller.jump(dino_id)
-            time.sleep(0.1)
+            time.sleep(0.01)

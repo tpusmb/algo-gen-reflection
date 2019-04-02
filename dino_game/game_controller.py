@@ -107,6 +107,9 @@ class GameController:
         """
         return self.game.get_saved_scores()
 
+    def set_simulation_speed_multiplier(self, value):
+        self.game.set_simulation_speed_multiplier(value)
+
 
 if __name__ == "__main__":
     controller = GameController(2)

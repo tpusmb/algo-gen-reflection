@@ -611,6 +611,10 @@ class Game:
     def game_is_over(self):
             return self.game_over
 
+    def set_simulation_speed_multiplier(self, value):
+        global FPS
+        FPS = 60 * value
+
 
 def start_game():
     is_game_quit = intro_screen()
