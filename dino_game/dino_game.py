@@ -10,7 +10,7 @@ pygame.init()
 
 FOLDER_ABSOLUTE_PATH = os.path.normpath(os.path.dirname(os.path.abspath(__file__)))
 SCREEN_SIZE = (width, height) = (600, 150)
-FPS = 60
+FPS = 200
 GRAVITY = 0.6
 
 BLACK = (0, 0, 0)
