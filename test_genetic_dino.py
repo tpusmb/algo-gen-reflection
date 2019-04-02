@@ -6,7 +6,7 @@ from __future__ import absolute_import
 import logging.handlers
 import os
 import time
-import json
+from math import sqrt
 
 from neural import Neuron, Input
 from genetic.algo_genetic_by_functions import *
@@ -46,7 +46,7 @@ class DinoNeurons(Individual):
         index_gen = 0
         # jump neuron - 1 to remove the bias node
         for index_weight in range(self.neuron_jump.get_weight_len() - 1):
-            print("Weight {} jump: {}".format(index_weight, gen[index_gen]))
+            #print("Weight {} jump: {}".format(index_weight, gen[index_gen]))
             self.neuron_jump.weight_liste[index_weight] = gen[index_gen]
             index_gen += 1
         # bias node for jump neuron
@@ -56,7 +56,7 @@ class DinoNeurons(Individual):
 
         # no jump neuron - 1 to remove the bias node
         for index_weight in range(self.neuron_no_jump.get_weight_len() - 1):
-            print("Weight {} no jump: {}".format(index_weight, gen[index_gen]))
+            #print("Weight {} no jump: {}".format(index_weight, gen[index_gen]))
             self.neuron_no_jump.weight_liste[index_weight] = gen[index_gen]
             index_gen += 1
 
@@ -93,23 +93,6 @@ class DinoFactory(IndividualFactory):
         return DinoNeurons(self.inputs_list, gen)
 
 
-def write_best_genom(d_population, scores, nb_iteration):
-    best_score = 0
-    best_score_index = -1
-    for i in range(len(d_population) - 1):
-        best_score_index += 1
-        PYTHON_LOGGER.info("Score de {} = {}".format(i, scores[i]))
-        if scores[i] > best_score:
-            best_score = scores[i]
-    data = {}
-    data['score'] = []
-    data['genom'] = []
-    data['score'].append(best_score)
-    data['genom'].append(d_population[best_score_index].genome)
-    with open('best_score{}.txt'.format(nb_iteration), 'w') as outfile:
-        json.dump(data, outfile)
-
-
 if __name__ == "__main__":
     from neural import sigmoid
     from dino_game import GameController, width
@@ -134,11 +117,30 @@ if __name__ == "__main__":
     controller = GameController(numbers_of_dino=NUMBER_OF_DINO)
     while True:
         if controller.game_is_over():
+            averageScore = 0
+            variance = 0
+            minScore = -1
+            maxScore = 0
+
             random.seed(None)  # Reset the seed to be pseudo-random
             dino_score = controller.get_saved_scores()
             for dino_id, dino_neurons in enumerate(dino_population):
                 dino_neurons.set_score(dino_score[dino_id])
-            write_best_genom(dino_population, dino_score, controller.get_nb_iteration())
+                averageScore += dino_score[dino_id]
+                if dino_score[dino_id] > maxScore:
+                    maxScore = dino_score[dino_id]
+                if dino_score[dino_id] < minScore or minScore == -1:
+                    minScore = dino_score[dino_id]
+            averageScore = averageScore/NUMBER_OF_DINO
+            print("average score = {}".format(averageScore))
+            etendue = maxScore-minScore
+            for dino_id, dino_neurons in enumerate(dino_population):
+                variance += (dino_score[dino_id]-averageScore)*(dino_score[dino_id]-averageScore)
+            variance = variance/NUMBER_OF_DINO
+            ecartType = sqrt(variance)
+            print("écart type = {}".format(ecartType))
+
+
             dino_population = genetic.step_paralleled(dino_population)
             controller.restart_game(NUMBER_OF_DINO)
             random.seed(42)
