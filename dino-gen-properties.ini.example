@@ -2,16 +2,24 @@
 ; General configuration for the program
 
 # Number of dino to creat
-population size = 100
+population_size = 100
 
 [Neurones]
 ; Configuration for dino neurones
 
 # With value range to init the weight of the neurones. The range is -value +value
-neurones weight value range = 1.0
+neurones_weight_value_range = 1.0
 
 # List of all the inputs for neurones
 inputs = distance first, distance between, speed
 
 # activation function
-neurones activation functions = sigmoid
+neurones_activation_functions = sigmoid
+
+
+[Genetic]
+
+init_population_fun = random_uniform_init
+select_mates_fun = generic_selection_couple
+reproduction_fun = uniform_crossover
+mutation_fun = mutation_gaussian
