@@ -1,8 +1,9 @@
 [General]
 ; General configuration for the program
 
-# Number of dino to creat
-population_size = 100
+# Number of dino to create (should be an even number)
+population_size = 20
+use_multi_thread = yes
 
 [Neurones]
 ; Configuration for dino neurones
@@ -23,3 +24,5 @@ init_population_fun = random_uniform_init
 select_mates_fun = generic_selection_couple
 reproduction_fun = uniform_crossover
 mutation_fun = mutation_gaussian
+mutate_ratio = 0.1
+crossover_ratio = 0.9

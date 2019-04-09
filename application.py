@@ -137,17 +137,17 @@ class DinoGen:
         self.gap_between_obstacles = Input(value=0)
         self.config_reader = config_reader
         self.input_list = [self.game_speed, self.distance_next_obstacle, self.gap_between_obstacles]
-        self.population_size = int(self.config_reader.General["population_size"])
+        self.population_size = self.config_reader.General.getint("population_size")
         self.genetic = AlgoGeneticByFunctions(population_size=self.population_size,
                                               genome_size=(len(self.input_list) + 1) * 2,
-                                              mutate_ratio=0.1,
+                                              mutate_ratio=config_reader.Genetic.getfloat("mutate_ratio"),
                                               factory=DinoFactory(self.input_list),
                                               init_population_fun=eval(config_reader.Genetic["init_population_fun"]),
                                               select_mates_fun=eval(config_reader.Genetic["select_mates_fun"]),
                                               reproduction_fun=eval(
                                                   config_reader.Genetic["reproduction_fun"]),
                                               mutation_fun=eval(config_reader.Genetic["mutation_fun"]),
-                                              crossover_ratio=0.9,
+                                              crossover_ratio=config_reader.Genetic.getfloat("crossover_ratio"),
                                               range_min=-1.0,
                                               range_max=1.0)
         self.dino_population = self.genetic.init_population()
@@ -215,7 +215,10 @@ class DinoGen:
                     self.hight_score = self.max_score
                     self.write_best_genom(self.dino_population[self.best_dino_id], dino_score[self.best_dino_id],
                                           controller.get_nb_iteration())
-                self.dino_population = self.genetic.step_paralleled(self.dino_population)
+                if self.config_reader.General.getboolean('use_multi_thread'):
+                    self.dino_population = self.genetic.step_paralleled(self.dino_population)
+                else:
+                    self.dino_population = self.genetic.step(self.dino_population)
                 controller.restart_game(self.population_size)
             else:
                 # update inputs

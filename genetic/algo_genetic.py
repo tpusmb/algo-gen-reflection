@@ -62,6 +62,8 @@ class AlgoGenetic:
             child1, child2 = self.reproduction(mate1, mate2)
             children.append(child1)
             children.append(child2)
+        if len(children) == self.population_size + 1:
+            children.pop()
         return self.mutation(children)
 
     def step_paralleled(self, previous_population: population) -> population:
