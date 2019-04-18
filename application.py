@@ -232,16 +232,16 @@ class DinoGen:
                                                                                         # of the difference of score
                                                                                         # beetween first and second
                 if self.standart_deviation > 150:
-                    self.mutate_ratio = 0  # There is a good improvement so we don't want to loose him
+                    self.new_mutate_ratio = 0  # There is a good improvement so we don't want to loose him
                 else:
-                    self.mutate_ratio = 0.1  # Standart
+                    self.new_mutate_ratio = self.mutate_ratio  # Standart
                 PYTHON_LOGGER.info("New crossover ratio = {}".format(self.crossover_ratio))
                 PYTHON_LOGGER.info("New mutate ratio = {}\n".format(self.mutate_ratio))
 
                 # redefined the algo taking care of previous run'statistics
                 self.genetic = AlgoGeneticByFunctions(population_size=self.population_size,
                                                       genome_size=(len(self.input_list) + 1) * 2,
-                                                      mutate_ratio=self.mutate_ratio,
+                                                      mutate_ratio=self.new_mutate_ratio,
                                                       factory=DinoFactory(self.input_list),
                                                       init_population_fun=self.init_population_fun,
                                                       select_mates_fun=self.select_mates_fun,
