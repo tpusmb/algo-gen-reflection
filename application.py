@@ -138,16 +138,21 @@ class DinoGen:
         self.config_reader = config_reader
         self.input_list = [self.game_speed, self.distance_next_obstacle, self.gap_between_obstacles]
         self.population_size = self.config_reader.General.getint("population_size")
+        self.mutate_ratio = config_reader.Genetic.getfloat("mutate_ratio")
+        self.init_population_fun = eval(config_reader.Genetic["init_population_fun"])
+        self.select_mates_fun = eval(config_reader.Genetic["select_mates_fun"])
+        self.reproduction_fun = eval(config_reader.Genetic["reproduction_fun"])
+        self.mutation_fun = eval(config_reader.Genetic["mutation_fun"])
+        self.crossover_ratio = config_reader.Genetic.getfloat("crossover_ratio")
         self.genetic = AlgoGeneticByFunctions(population_size=self.population_size,
                                               genome_size=(len(self.input_list) + 1) * 2,
-                                              mutate_ratio=config_reader.Genetic.getfloat("mutate_ratio"),
+                                              mutate_ratio=self.mutate_ratio,
                                               factory=DinoFactory(self.input_list),
-                                              init_population_fun=eval(config_reader.Genetic["init_population_fun"]),
-                                              select_mates_fun=eval(config_reader.Genetic["select_mates_fun"]),
-                                              reproduction_fun=eval(
-                                                  config_reader.Genetic["reproduction_fun"]),
-                                              mutation_fun=eval(config_reader.Genetic["mutation_fun"]),
-                                              crossover_ratio=config_reader.Genetic.getfloat("crossover_ratio"),
+                                              init_population_fun=self.init_population_fun,
+                                              select_mates_fun=self.select_mates_fun,
+                                              reproduction_fun=self.reproduction_fun,
+                                              mutation_fun=self.mutation_fun,
+                                              crossover_ratio=self.crossover_ratio,
                                               range_min=-1.0,
                                               range_max=1.0)
         self.dino_population = self.genetic.init_population()
@@ -156,7 +161,8 @@ class DinoGen:
         self.average_score = 0
         self.min_score = 0
         self.max_score = 0
-        self.ecart_type = 0
+        self.second_max_score = 0
+        self.standart_deviation = 0
         self.best_dino_id = None
         self.hight_score = -1
 
@@ -177,23 +183,28 @@ class DinoGen:
         self.variance = 0
         self.min_score = -1
         self.max_score = 0
-        self.ecart_type = 0
+        self.second_max_score = 0
+        self.standart_deviation = 0
+
         for dino_id, dino_neurons in enumerate(self.dino_population):
             self.average_score += dino_score[dino_id]
-            if dino_score[dino_id] > self.max_score:
+            if self.max_score < dino_score[dino_id]:
+                self.second_max_score = self.max_score
                 self.max_score = dino_score[dino_id]
                 self.best_dino_id = dino_id
+            if self.second_max_score < dino_score[dino_id] < self.max_score:
+                self.second_max_score = dino_score[dino_id]     # all of that to avoid sorting dino...
             if dino_score[dino_id] < self.min_score or self.min_score == -1:
                 self.min_score = dino_score[dino_id]
+        self.average_score = self.average_score / self.population_size
 
         for dino_id, dino_neurons in enumerate(self.dino_population):
             self.variance += (dino_score[dino_id] - self.average_score) * (dino_score[dino_id] - self.average_score)
 
-        self.average_score = self.average_score / self.population_size
         self.variance = self.variance / self.population_size
-        self.ecart_type = sqrt(self.variance)
+        self.standart_deviation = sqrt(self.variance)
         PYTHON_LOGGER.info("Average score = {}".format(self.average_score))
-        PYTHON_LOGGER.info("Ecart type = {}".format(self.ecart_type))
+        PYTHON_LOGGER.info("Standart deviation = {}".format(self.standart_deviation))
         PYTHON_LOGGER.info("Max Score = {}".format(self.max_score))
         PYTHON_LOGGER.info("Min Score = {}".format(self.min_score))
         PYTHON_LOGGER.info("Best Dino id = {}".format(self.best_dino_id))
@@ -215,6 +226,32 @@ class DinoGen:
                     self.hight_score = self.max_score
                     self.write_best_genom(self.dino_population[self.best_dino_id], dino_score[self.best_dino_id],
                                           controller.get_nb_iteration())
+
+                ## REFLEXIVITYYY ##
+                self.crossover_ratio = 0.5 + (1 - self.second_max_score/self.max_score) / 2  # crossover_ratio depending
+                                                                                        # of the difference of score
+                                                                                        # beetween first and second
+                if self.standart_deviation > 150:
+                    self.mutate_ratio = 0  # There is a good improvement so we don't want to loose him
+                else:
+                    self.mutate_ratio = 0.1  # Standart
+                PYTHON_LOGGER.info("New crossover ratio = {}".format(self.crossover_ratio))
+                PYTHON_LOGGER.info("New mutate ratio = {}\n".format(self.mutate_ratio))
+
+                # redefined the algo taking care of previous run'statistics
+                self.genetic = AlgoGeneticByFunctions(population_size=self.population_size,
+                                                      genome_size=(len(self.input_list) + 1) * 2,
+                                                      mutate_ratio=self.mutate_ratio,
+                                                      factory=DinoFactory(self.input_list),
+                                                      init_population_fun=self.init_population_fun,
+                                                      select_mates_fun=self.select_mates_fun,
+                                                      reproduction_fun=self.reproduction_fun,
+                                                      mutation_fun=self.mutation_fun,
+                                                      crossover_ratio=self.crossover_ratio,
+                                                      range_min=-1.0,
+                                                      range_max=1.0)
+
+
                 if self.config_reader.General.getboolean('use_multi_thread'):
                     self.dino_population = self.genetic.step_paralleled(self.dino_population)
                 else:
@@ -230,7 +267,7 @@ class DinoGen:
                 for dino_id, dino_neurons in enumerate(self.dino_population):
                     if not controller.is_dead(dino_id) and dino_neurons.need_to_jump():
                         controller.jump(dino_id)
-                time.sleep(0.01)
+                time.sleep(0.005)
 
     def stop(self):
 

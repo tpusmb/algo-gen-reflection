@@ -28,7 +28,7 @@ PYTHON_LOGGER.setLevel(logging.DEBUG)
 
 # Absolute path to the folder location of this python file
 FOLDER_ABSOLUTE_PATH = os.path.normpath(os.path.dirname(os.path.abspath(__file__)))
-NUMBER_OF_DINO = 50
+NUMBER_OF_DINO = 100
 
 
 class DinoNeurons(Individual):
@@ -133,6 +133,7 @@ if __name__ == "__main__":
         if controller.game_is_over():
             averageScore = 0
             variance = 0
+            standart_deviation = 0
             minScore = -1
             maxScore = 0
 
@@ -156,10 +157,10 @@ if __name__ == "__main__":
             print("standart deviation = {}".format(standart_deviation))
 
             ## REFLEXIVITYYY ##
-            if standart_deviation > 20:
+            if standart_deviation > 100:
                 mutate_ratio = 0    # There is a good improvement so we don't want to loose him
             elif standart_deviation < 5:
-                mutate_ratio = 0.3  # we want to change something
+                mutate_ratio = 0.5  # we want to change something
             else:
                 mutate_ratio = 0.1  # Standart
 
@@ -171,7 +172,7 @@ if __name__ == "__main__":
                                    select_mates_fun=generic_selection_couple,
                                    reproduction_fun=uniform_crossover,
                                    mutation_fun=mutation_gaussian,
-                                   crossover_ratio=0.9,
+                                   crossover_ratio=0.5,
                                    range_min=-1.0,
                                    range_max=1.0)
 
