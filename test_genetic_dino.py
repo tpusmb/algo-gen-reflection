@@ -107,6 +107,12 @@ def write_best_genom(d_population, scores, nb_iteration):
         json.dump(data, outfile)
 
 
+def read_genom_file(file_name):
+    with open('{}'.format(file_name), 'r') as outfile:
+        data = json.load(outfile)
+        return data['genom']
+
+
 if __name__ == "__main__":
     from neural import sigmoid
     from dino_game import GameController, width
