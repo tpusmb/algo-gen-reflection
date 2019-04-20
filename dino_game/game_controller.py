@@ -110,6 +110,9 @@ class GameController:
     def set_simulation_speed_multiplier(self, value):
         self.game.set_simulation_speed_multiplier(value)
 
+    def set_nb_iteration(self, nb_iteration):
+        return self.game.set_nb_iteration(nb_iteration)
+
 
 if __name__ == "__main__":
     controller = GameController(2)

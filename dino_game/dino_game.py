@@ -620,6 +620,10 @@ class Game:
         global FPS
         FPS = 60 * value
 
+    def set_nb_iteration(self, nb_iteration):
+        global NB_ITERATION
+        NB_ITERATION = nb_iteration
+
 
 def start_game():
     is_game_quit = intro_screen()

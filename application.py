@@ -5,14 +5,16 @@
 Main app
 
 Usage:
-   application.py <config-abs-path> [--manual]
-   application.py run <config-abs-path> <genom-abs-path>
+   application.py <config-abs-path> [--manual] [--continue <population-abs-path>]
+   application.py run <config-abs-path> <genome-abs-path>
 
 Options:
-    -h --help           Show this screen.
-    --manual            Manual mode (you play the game)
-    <config-abs-path>   Absolute path to the .ini config file
-    <genom-abs-path>   Absolute path to the .txt genome file to run
+    -h --help             Show this screen.
+    --manual              Manual mode (you play the game)
+    --continue            Continue the training from the .txt population file
+    <population-abs-path>
+    <config-abs-path>     Absolute path to the .ini config file
+    <genome-abs-path>     Absolute path to the .txt genome file to run
 
 """
 
@@ -113,6 +115,9 @@ class DinoNeurons(Individual):
             raise ValueError("The score is not set")
         return self.dino_score
 
+    def to_dict(self):
+        return {'score': self.get_score(), 'genome': self.genome}
+
 
 class DinoFactory(IndividualFactory):
 
@@ -129,7 +134,7 @@ class DinoFactory(IndividualFactory):
 
 class DinoGen:
 
-    def __init__(self, config_reader, genome=None):
+    def __init__(self, config_reader, genomes=None, nb_iteration=0):
         """
 
         :param config_reader: (ConfigReader)
@@ -158,10 +163,6 @@ class DinoGen:
                                               crossover_ratio=self.crossover_ratio,
                                               range_min=-1.0,
                                               range_max=1.0)
-        if genome is None:
-            self.dino_population = self.genetic.init_population()
-        else:
-            self.dino_population = [dino_factory.create_individual(genome)]
         self.app_finish = False
         self.variance = 0
         self.average_score = 0
@@ -171,19 +172,48 @@ class DinoGen:
         self.standart_deviation = 0
         self.best_dino_id = None
         self.hight_score = -1
+        self.starting_iteration = nb_iteration
+
+        # init the population from scratch or from the parameter
+        if genomes is None:
+            self.dino_population = self.genetic.init_population()
+        else:
+            self.dino_population = []
+            for genome in genomes:
+                dino = dino_factory.create_individual(genome)
+                self.dino_population.append(dino)
 
     @staticmethod
-    def write_best_genom(dino_to_save, score_best_dino, nb_iteration):
+    def write_best_genome(dino_to_save, nb_iteration):
 
-        data = {'score': score_best_dino, 'genom': dino_to_save.genome}
+        data = dino_to_save.to_dict()
         with open('best_score{}.txt'.format(nb_iteration), 'w') as outfile:
+            json.dump(data, outfile)
+
+    def write_population_genomes(self, nb_iteration):
+        data = {"nb_iteration": nb_iteration}
+        genomes = []
+        for dino in self.dino_population:
+            genomes.append(dino.to_dict())
+        data["genomes"] = genomes
+
+        with open('population_{}.txt'.format(nb_iteration), 'w') as outfile:
             json.dump(data, outfile)
 
     @staticmethod
     def read_genom_file(file_name):
-        with open('{}'.format(file_name), 'r') as outfile:
-            data = json.load(outfile)
-            return data['genom']
+        with open(file_name, 'r') as file:
+            data = json.load(file)
+            return data['genome']
+
+    @staticmethod
+    def read_population_file(file_name):
+        res = []
+        with open(file_name, 'r') as file:
+            population = json.load(file)
+            for dino in population["genomes"]:
+                res.append(dino["genome"])
+            return res, population["nb_iteration"]
 
     def state_analyse(self, dino_score):
         """
@@ -222,13 +252,14 @@ class DinoGen:
         PYTHON_LOGGER.info("Best Dino id = {}".format(self.best_dino_id))
 
     def run(self):
-
         controller = GameController(numbers_of_dino=self.population_size)
+        controller.set_nb_iteration(self.starting_iteration)
 
         while True:
             if controller.game_is_over():
 
-                PYTHON_LOGGER.info("****End of iteration {}****".format(controller.get_nb_iteration()))
+                nb_iteration = controller.get_nb_iteration()
+                PYTHON_LOGGER.info("****End of iteration {}****".format(nb_iteration))
                 dino_score = controller.get_saved_scores()
                 for dino_id, dino_neurons in enumerate(self.dino_population):
                     dino_neurons.set_score(dino_score[dino_id])
@@ -236,8 +267,11 @@ class DinoGen:
                 self.state_analyse(dino_score)
                 if self.max_score > self.hight_score:
                     self.hight_score = self.max_score
-                    self.write_best_genom(self.dino_population[self.best_dino_id], dino_score[self.best_dino_id],
-                                          controller.get_nb_iteration())
+                    self.write_best_genome(self.dino_population[self.best_dino_id], nb_iteration)
+
+                # save training progress
+                if nb_iteration % 10 == 0:
+                    self.write_population_genomes(nb_iteration)
 
                 ## REFLEXIVITYYY ##
                 self.crossover_ratio = 0.5 + (1 - self.second_max_score/self.max_score) / 2  # crossover_ratio depending
@@ -306,11 +340,15 @@ if __name__ == "__main__":
     if args["--manual"]:
         start_game()
     elif args["run"]:
-        genome = DinoGen.read_genom_file(args["<genom-abs-path>"])
+        genome = DinoGen.read_genom_file(args["<genome-abs-path>"])
         config = ConfigReader(args["<config-abs-path>"])
-        dino_gen = DinoGen(config, genome)
+        dino_gen = DinoGen(config, [genome])
         dino_gen.run_single()
     else:
         config = ConfigReader(args["<config-abs-path>"])
-        dino_gen = DinoGen(config)
+        if args["--continue"] and "<population-abs-path>" in args:
+            genomes, nb_iteration = DinoGen.read_population_file(args["<population-abs-path>"])
+            dino_gen = DinoGen(config, genomes, nb_iteration)
+        else:
+            dino_gen = DinoGen(config)
         dino_gen.run()
