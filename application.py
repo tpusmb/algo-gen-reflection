@@ -6,11 +6,13 @@ Main app
 
 Usage:
    application.py <config-abs-path> [--manual]
+   application.py run <config-abs-path> <genom-abs-path>
 
 Options:
     -h --help           Show this screen.
     --manual            Manual mode (you play the game)
     <config-abs-path>   Absolute path to the .ini config file
+    <genom-abs-path>   Absolute path to the .txt genome file to run
 
 """
 
@@ -25,7 +27,7 @@ import time
 from docopt import docopt
 from math import sqrt
 
-from dino_game import GameController, width
+from dino_game import GameController, width, start_game
 from genetic import Individual
 from genetic.algo_genetic_by_functions import *
 from genetic.individual import genome, IndividualFactory
@@ -127,7 +129,7 @@ class DinoFactory(IndividualFactory):
 
 class DinoGen:
 
-    def __init__(self, config_reader):
+    def __init__(self, config_reader, genome=None):
         """
 
         :param config_reader: (ConfigReader)
@@ -144,10 +146,11 @@ class DinoGen:
         self.reproduction_fun = eval(config_reader.Genetic["reproduction_fun"])
         self.mutation_fun = eval(config_reader.Genetic["mutation_fun"])
         self.crossover_ratio = config_reader.Genetic.getfloat("crossover_ratio")
+        dino_factory = DinoFactory(self.input_list)
         self.genetic = AlgoGeneticByFunctions(population_size=self.population_size,
                                               genome_size=(len(self.input_list) + 1) * 2,
                                               mutate_ratio=self.mutate_ratio,
-                                              factory=DinoFactory(self.input_list),
+                                              factory=dino_factory,
                                               init_population_fun=self.init_population_fun,
                                               select_mates_fun=self.select_mates_fun,
                                               reproduction_fun=self.reproduction_fun,
@@ -155,7 +158,10 @@ class DinoGen:
                                               crossover_ratio=self.crossover_ratio,
                                               range_min=-1.0,
                                               range_max=1.0)
-        self.dino_population = self.genetic.init_population()
+        if genome is None:
+            self.dino_population = self.genetic.init_population()
+        else:
+            self.dino_population = [dino_factory.create_individual(genome)]
         self.app_finish = False
         self.variance = 0
         self.average_score = 0
@@ -172,6 +178,12 @@ class DinoGen:
         data = {'score': score_best_dino, 'genom': dino_to_save.genome}
         with open('best_score{}.txt'.format(nb_iteration), 'w') as outfile:
             json.dump(data, outfile)
+
+    @staticmethod
+    def read_genom_file(file_name):
+        with open('{}'.format(file_name), 'r') as outfile:
+            data = json.load(outfile)
+            return data['genom']
 
     def state_analyse(self, dino_score):
         """
@@ -269,6 +281,21 @@ class DinoGen:
                         controller.jump(dino_id)
                 time.sleep(0.005)
 
+    def run_single(self):
+        controller = GameController(numbers_of_dino=1)
+
+        while not controller.game_is_over():
+            # update inputs
+            self.game_speed.set_value(controller.get_speed() / 100.0)
+            self.distance_next_obstacle.set_value(controller.get_distance_of_first_obstacle() / float(width))
+            self.gap_between_obstacles.set_value(
+                controller.get_distance_between_first_and_second_obstacle() / float(width))
+
+            for dino_id, dino_neurons in enumerate(self.dino_population):
+                if not controller.is_dead(dino_id) and dino_neurons.need_to_jump():
+                    controller.jump(dino_id)
+            time.sleep(0.005)
+
     def stop(self):
 
         self.app_finish = True
@@ -276,6 +303,14 @@ class DinoGen:
 
 if __name__ == "__main__":
     args = docopt(__doc__)
-    config = ConfigReader(args["<config-abs-path>"])
-    dino_gen = DinoGen(config)
-    dino_gen.run()
+    if args["--manual"]:
+        start_game()
+    elif args["run"]:
+        genome = DinoGen.read_genom_file(args["<genom-abs-path>"])
+        config = ConfigReader(args["<config-abs-path>"])
+        dino_gen = DinoGen(config, genome)
+        dino_gen.run_single()
+    else:
+        config = ConfigReader(args["<config-abs-path>"])
+        dino_gen = DinoGen(config)
+        dino_gen.run()
