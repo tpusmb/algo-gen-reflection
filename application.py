@@ -171,7 +171,7 @@ class DinoGen:
         self.second_max_score = 0
         self.standart_deviation = 0
         self.best_dino_id = None
-        self.hight_score = -1
+        self.high_score = -1
         self.starting_iteration = nb_iteration
 
         # init the population from scratch or from the parameter
@@ -191,7 +191,7 @@ class DinoGen:
             json.dump(data, outfile)
 
     def write_population_genomes(self, nb_iteration):
-        data = {"nb_iteration": nb_iteration}
+        data = {"nb_iteration": nb_iteration, "high_score": self.high_score}
         genomes = []
         for dino in self.dino_population:
             genomes.append(dino.to_dict())
@@ -265,8 +265,8 @@ class DinoGen:
                     dino_neurons.set_score(dino_score[dino_id])
 
                 self.state_analyse(dino_score)
-                if self.max_score > self.hight_score:
-                    self.hight_score = self.max_score
+                if self.max_score > self.high_score:
+                    self.high_score = self.max_score
                     self.write_best_genome(self.dino_population[self.best_dino_id], nb_iteration)
 
                 # save training progress
@@ -348,7 +348,7 @@ if __name__ == "__main__":
         config = ConfigReader(args["<config-abs-path>"])
         if args["--continue"] and "<population-abs-path>" in args:
             genomes, nb_iteration = DinoGen.read_population_file(args["<population-abs-path>"])
-            dino_gen = DinoGen(config, genomes, nb_iteration)
+            dino_gen = DinoGen(config, genomes, nb_iteration + 1)
         else:
             dino_gen = DinoGen(config)
         dino_gen.run()
